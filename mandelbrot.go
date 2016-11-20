@@ -15,31 +15,26 @@ func Mandelbrot(c *Context) int {
 }
 
 func Escape(c *Context, z complex128, max_i int) (int, complex128) {
-	z0 := z
-	var zl complex128
+	var d float64
 	var i int
 
-	if CheckCardioid(z) {
-		return max_i, z
-	}
+	z0 := z
+	zn := complex(0, 0)
 
-	d := math.Sqrt(real(z)*real(z) + imag(z)*imag(z))
-	for i = 0; d < c.Parameters.EscapeRadius && i < max_i; i++ {
+	for {
 		z = z*z + z0
-		d = math.Sqrt(real(z)*real(z) + imag(z)*imag(z))
-
-		// Periodicity Check
-		if z == zl {
+		if zn == z {
 			return max_i, z
 		}
-		zl = z
+		zn = z
+
+		d = math.Sqrt(real(z)*real(z) + imag(z)*imag(z))
+		if d >= c.Parameters.EscapeRadius || i == max_i {
+			return i, z
+		}
+
+		i++
 	}
 
-	return i, z
-}
-
-func CheckCardioid(z complex128) bool {
-	q := (real(z)-0.25)*(real(z)-0.25) + imag(z)*imag(z)
-	q = q * (q + (real(z) - 0.25))
-	return q < imag(z)*imag(z)*0.25
+	return i, z0
 }

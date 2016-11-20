@@ -15,12 +15,13 @@ var w = 1024
 var h = int(float64(w) * (imag(b) - imag(a)) / (real(b) - real(a)))
 
 var p = Parameters{
-	ImageWidth:  w,
-	ImageHeight: h,
-	Min:         a,
-	Max:         b,
-	MaxI:        1000,
-	ColorFunc:   ColorMono,
+	ImageWidth:   w,
+	ImageHeight:  h,
+	Min:          a,
+	Max:          b,
+	MaxI:         1000,
+	ColorFunc:    ColorMono,
+	EscapeRadius: 4.0,
 }
 
 var img = image.NewNRGBA64(image.Rect(0, 0, p.ImageWidth, p.ImageHeight))
@@ -49,11 +50,11 @@ func TestMandelbrot(t *testing.T) {
 func TestEscape(t *testing.T) {
 	i, _ := Escape(context, z_in, p.MaxI)
 	if i != p.MaxI {
-		t.Errorf("Incorrectly calculated point in set: %v iterations: %v", z_in, p.MaxI)
+		t.Errorf("Incorrectly calculated point in set: %v iterations: %v != %v", z_in, i, p.MaxI)
 	}
 	i, _ = Escape(context, z_out, p.MaxI)
 	if i >= p.MaxI {
-		t.Errorf("Incorrectly calculated point not in set: %v iterations: %v", z_out, p.MaxI)
+		t.Errorf("Incorrectly calculated point not in set: %v iterations: %v >= %v", z_out, i, p.MaxI)
 	}
 }
 
