@@ -1,13 +1,13 @@
-.PHONY: all bench clean
+.PHONY: all bench clean lib
 
-all: clean test
+all: clean lib
 
 clean:
 	go clean .
 	rm -f $(IMAGE_FILE)
 	rm -f *.out
 
-$(BIN):
+lib:
 	go build .
 
 test: clean
