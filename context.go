@@ -70,7 +70,7 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 	return
 }
 
-func (self *Context) Delta() (dx, dy float64) {
+func (self *Context) delta() (dx, dy float64) {
 	rw := self.Parameters.ImageWidth
 	rh := self.Parameters.ImageHeight
 
@@ -89,13 +89,13 @@ func (self *Context) Delta() (dx, dy float64) {
 type ContextFunc func(int, int, complex128)
 
 /*
- * Iterate over the map of pixel coordinates and complex points. Pass in
+ * Iterate over the map of pixel coordinates and complex points.
  */
 func (self *Context) EachPoint(fn ContextFunc) {
 	rmin := self.Image.Bounds().Min
 	rmax := self.Image.Bounds().Max
 	cmin := self.Parameters.Min
-	dx, dy := self.Delta()
+	dx, dy := self.delta()
 	var z complex128
 
 	for x := rmin.X; x < rmax.X; x++ {
