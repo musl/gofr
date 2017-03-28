@@ -1,15 +1,48 @@
 package gofr
 
 import (
+	"errors"
 	"image/color"
 	"math"
+	"strconv"
 )
+
+func ColorFuncFromString(name string) (ColorFunc, error) {
+	switch name {
+	case "smooth":
+		return ColorSmooth, nil
+	case "bands":
+		return ColorBands, nil
+	case "mono":
+		return ColorMono, nil
+	case "stripe":
+		return ColorMonoStripe, nil
+	default:
+		return nil, errors.New("Invalid ColorFunc name.")
+	}
+}
+
+func MemberColorFromString(hex string) (color.NRGBA64, error) {
+	mc, err := strconv.ParseInt(hex[1:len(hex)], 16, 32)
+	if err != nil {
+		return color.NRGBA64{0, 0, 0, 0}, err
+	}
+
+	member_color := color.NRGBA64{
+		uint16(((mc >> 16) & 0xff) * 0x101),
+		uint16(((mc >> 8) & 0xff) * 0x101),
+		uint16((mc & 0xff) * 0x101),
+		0xffff,
+	}
+
+	return member_color, nil
+}
 
 type ColorFunc func(*Context, complex128, int, int, int, int)
 
 func ColorSmooth(c *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
-		c.Image.Set(x, y, c.Parameters.MemberColor)
+		c.Image.Set(x, y, c.MemberColor)
 		return
 	}
 
@@ -30,7 +63,7 @@ func ColorSmooth(c *Context, z complex128, x, y, i, max_i int) {
 
 func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
-		c.Image.Set(x, y, c.Parameters.MemberColor)
+		c.Image.Set(x, y, c.MemberColor)
 		return
 	}
 
@@ -47,7 +80,7 @@ func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 
 func ColorMono(c *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
-		c.Image.Set(x, y, c.Parameters.MemberColor)
+		c.Image.Set(x, y, c.MemberColor)
 		return
 	}
 
@@ -58,7 +91,7 @@ func ColorMono(c *Context, z complex128, x, y, i, max_i int) {
 
 func ColorMonoStripe(c *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
-		c.Image.Set(x, y, c.Parameters.MemberColor)
+		c.Image.Set(x, y, c.MemberColor)
 		return
 	}
 

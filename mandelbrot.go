@@ -5,10 +5,10 @@ import (
 )
 
 func Mandelbrot(c *Context) int {
-	max_i := c.Parameters.MaxI
+	max_i := c.MaxI
 	fn := func(x, y int, z complex128) {
 		i, zn := Escape(c, z, max_i)
-		c.Parameters.ColorFunc(c, zn, x, y, i, max_i)
+		c.ColorFunc(c, zn, x, y, i, max_i)
 	}
 	c.EachPoint(fn)
 	return 0
@@ -29,7 +29,7 @@ func Escape(c *Context, z complex128, max_i int) (int, complex128) {
 		zn = z
 
 		d = math.Sqrt(real(z)*real(z) + imag(z)*imag(z))
-		if d >= c.Parameters.EscapeRadius || i == max_i {
+		if d >= c.EscapeRadius || i == max_i {
 			return i, z
 		}
 

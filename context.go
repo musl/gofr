@@ -3,26 +3,39 @@ package gofr
 import (
 	"image"
 	"image/color"
-	"log"
 )
 
+/*
+ * Easily serializeable parameters for rendering images.
+ */
 type Parameters struct {
-	ImageWidth   int
+	ColorFunc    string
+	EscapeRadius float64
 	ImageHeight  int
-	Min          complex128
+	ImageWidth   int
 	Max          complex128
 	MaxI         int
-	ColorFunc    ColorFunc
+	MemberColor  string
+	Min          complex128
 	Scaling      int
-	Logger       *log.Logger
-	MemberColor  color.NRGBA64
-	EscapeRadius float64
 }
 
+/*
+ * Context for rendering images in parallel - a basic description of
+ * work for a render job to be run in one thread.
+ */
 type Context struct {
-	Id         int
-	Image      *image.NRGBA64
-	Parameters *Parameters
+	ColorFunc    ColorFunc
+	EscapeRadius float64
+	Id           int
+	Image        *image.NRGBA64
+	ImageHeight  int
+	ImageWidth   int
+	Max          complex128
+	MaxI         int
+	MemberColor  color.NRGBA64
+	Min          complex128
+	Scaling      int
 }
 
 func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
@@ -35,6 +48,16 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 	ry := dy + (r.Max.Y % n)
 	w := dx
 	h := dy
+
+	mc, err := MemberColorFromString(p.MemberColor)
+	if err != nil {
+		panic(err)
+	}
+
+	cf, err := ColorFuncFromString(p.ColorFunc)
+	if err != nil {
+		panic(err)
+	}
 
 	if n <= 0 {
 		panic("I refuse to make zero or fewer contexts of an image.")
@@ -58,9 +81,17 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 
 			sub := im.SubImage(image.Rect(x, y, x+w, y+h)).(*image.NRGBA64)
 			nc := Context{
-				Id:         (i * n) + j,
-				Image:      sub,
-				Parameters: p,
+				ColorFunc:    cf,
+				EscapeRadius: p.EscapeRadius,
+				Id:           (i * n) + j,
+				Image:        sub,
+				ImageHeight:  p.ImageHeight,
+				ImageWidth:   p.ImageWidth,
+				Max:          p.Max,
+				MaxI:         p.MaxI,
+				MemberColor:  mc,
+				Min:          p.Min,
+				Scaling:      p.Scaling,
 			}
 
 			c = append(c, &nc)
@@ -71,11 +102,11 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 }
 
 func (self *Context) delta() (dx, dy float64) {
-	rw := self.Parameters.ImageWidth
-	rh := self.Parameters.ImageHeight
+	rw := self.ImageWidth
+	rh := self.ImageHeight
 
-	cw := real(self.Parameters.Max) - real(self.Parameters.Min)
-	ch := imag(self.Parameters.Max) - imag(self.Parameters.Min)
+	cw := real(self.Max) - real(self.Min)
+	ch := imag(self.Max) - imag(self.Min)
 
 	dx = cw / float64(rw)
 	dy = ch / float64(rh)
@@ -83,18 +114,18 @@ func (self *Context) delta() (dx, dy float64) {
 }
 
 /*
- * Use this with EachPoint to iterate over the map of pixel coordinates
- * and mapped complex points.
+* Use this with EachPoint to iterate over the map of pixel coordinates
+* and mapped complex points.
  */
 type ContextFunc func(int, int, complex128)
 
 /*
- * Iterate over the map of pixel coordinates and complex points.
+* Iterate over the map of pixel coordinates and complex points.
  */
 func (self *Context) EachPoint(fn ContextFunc) {
 	rmin := self.Image.Bounds().Min
 	rmax := self.Image.Bounds().Max
-	cmin := self.Parameters.Min
+	cmin := self.Min
 	dx, dy := self.delta()
 	var z complex128
 

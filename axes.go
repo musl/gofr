@@ -10,14 +10,14 @@ func DrawAxesInv(c *Context) {
 	context_min := c.Image.Bounds().Min
 	context_max := c.Image.Bounds().Max
 
-	zmin := c.Parameters.Min
-	zmax := c.Parameters.Max
+	zmin := c.Min
+	zmax := c.Max
 
 	zw := real(zmax) - real(zmin)
 	zh := imag(zmax) - imag(zmin)
 
-	dx := float64(c.Parameters.ImageWidth) / zw
-	dy := float64(c.Parameters.ImageHeight) / zh
+	dx := float64(c.ImageWidth) / zw
+	dy := float64(c.ImageHeight) / zh
 
 	x = int(math.Max(math.Abs(real(zmin))*dx, 0))
 	y = int(math.Max(math.Abs(imag(zmin))*dy, 0.0))
@@ -38,14 +38,14 @@ func DrawAxesColor(c *Context, k color.NRGBA64) {
 	context_min := c.Image.Bounds().Min
 	context_max := c.Image.Bounds().Max
 
-	zmin := c.Parameters.Min
-	zmax := c.Parameters.Max
+	zmin := c.Min
+	zmax := c.Max
 
 	zw := real(zmax) - real(zmin)
 	zh := imag(zmax) - imag(zmin)
 
-	dx := float64(c.Parameters.ImageWidth) / zw
-	dy := float64(c.Parameters.ImageHeight) / zh
+	dx := float64(c.ImageWidth) / zw
+	dy := float64(c.ImageHeight) / zh
 
 	x = int(math.Max(math.Abs(real(zmin))*dx, 0))
 	y = int(math.Max(math.Abs(imag(zmin))*dy, 0.0))
@@ -63,14 +63,14 @@ func DrawTicksColor(c *Context, tl int, unit float64, k color.NRGBA64) {
 	var x, y, i int
 	var n float64
 
-	zmin := c.Parameters.Min
-	zmax := c.Parameters.Max
+	zmin := c.Min
+	zmax := c.Max
 
 	zw := real(zmax) - real(zmin)
 	zh := imag(zmax) - imag(zmin)
 
-	dx := float64(c.Parameters.ImageWidth) / zw
-	dy := float64(c.Parameters.ImageHeight) / zh
+	dx := float64(c.ImageWidth) / zw
+	dy := float64(c.ImageHeight) / zh
 
 	x = int(math.Max(math.Abs(real(zmin))*dx, 0))
 	y = int(math.Max(math.Abs(imag(zmin))*dy, 0.0))
@@ -112,14 +112,14 @@ func DrawTicksInv(c *Context, tl int, unit float64) {
 	var x, y, i int
 	var n float64
 
-	zmin := c.Parameters.Min
-	zmax := c.Parameters.Max
+	zmin := c.Min
+	zmax := c.Max
 
 	zw := real(zmax) - real(zmin)
 	zh := imag(zmax) - imag(zmin)
 
-	dx := float64(c.Parameters.ImageWidth) / zw
-	dy := float64(c.Parameters.ImageHeight) / zh
+	dx := float64(c.ImageWidth) / zw
+	dy := float64(c.ImageHeight) / zh
 
 	x = int(math.Max(math.Abs(real(zmin))*dx, 0))
 	y = int(math.Max(math.Abs(imag(zmin))*dy, 0.0))
