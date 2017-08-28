@@ -42,7 +42,7 @@ type ColorFunc func(*Context, complex128, int, int, int, int)
 
 func ColorSmooth(c *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
-		c.Image.Set(x, y, c.MemberColor)
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
 	}
 
@@ -58,12 +58,12 @@ func ColorSmooth(c *Context, z complex128, x, y, i, max_i int) {
 	b := uint16(0x7fff + 0x7fff*math.Cos(o+t))
 
 	l := color.NRGBA64{r, g, b, 0xffff}
-	c.Image.Set(x, y, l)
+	c.Image.SetNRGBA64(x, y, l)
 }
 
 func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
-		c.Image.Set(x, y, c.MemberColor)
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
 	}
 
@@ -75,32 +75,43 @@ func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 	b := uint16(0x7fff + 0x7fff*math.Cos(o+t))
 
 	l := color.NRGBA64{r, g, b, 0xffff}
-	c.Image.Set(x, y, l)
+	c.Image.SetNRGBA64(x, y, l)
 }
 
 func ColorMono(c *Context, z complex128, x, y, i, max_i int) {
+	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
+	black := color.NRGBA64{0, 0, 0, 0xffff}
+
 	if i == max_i {
-		c.Image.Set(x, y, c.MemberColor)
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
 	}
 
-	k := uint16(0xffff * (i & 1))
-	l := color.NRGBA64{k, k, k, 0xffff}
-	c.Image.Set(x, y, l)
+	if i&1 == 0 {
+		c.Image.SetNRGBA64(x, y, white)
+	} else {
+		c.Image.SetNRGBA64(x, y, black)
+	}
 }
 
 func ColorMonoStripe(c *Context, z complex128, x, y, i, max_i int) {
+	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
+	black := color.NRGBA64{0, 0, 0, 0xffff}
+	accent := color.NRGBA64{0, 0xa000, 0xc000, 0xffff}
+
 	if i == max_i {
-		c.Image.Set(x, y, c.MemberColor)
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
 	}
 
 	if (i-1)%9 == 0 {
-		c.Image.Set(x, y, color.NRGBA64{0, 0xa000, 0xc000, 0xffff})
+		c.Image.SetNRGBA64(x, y, accent)
 		return
 	}
 
-	k := uint16(0xffff * (i & 1))
-	l := color.NRGBA64{k, k, k, 0xffff}
-	c.Image.Set(x, y, l)
+	if i&1 == 0 {
+		c.Image.SetNRGBA64(x, y, white)
+	} else {
+		c.Image.SetNRGBA64(x, y, black)
+	}
 }
