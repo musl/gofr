@@ -11,11 +11,12 @@ lib:
 	go build .
 
 test: clean
-	go test -memprofile mem.out -cpuprofile cpu.out .
+	go test -v -memprofile mem.out -cpuprofile cpu.out .
 
-graphs: test
-	go tool pprof --png $(BIN).test cpu.out > cpu_graph.png
-	go tool pprof --png $(BIN).test mem.out > mem_graph.png
+bench: lib
+	go test -bench -v -memprofile mem.out -cpuprofile cpu.out .
 
-bench: $(BIN)
-	go test -bench .
+graphs: bench
+	go tool pprof --png libgofr.test cpu.out > cpu_graph.png
+	go tool pprof --png libgofr.test mem.out > mem_graph.png
+
