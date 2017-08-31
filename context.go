@@ -18,6 +18,7 @@ type Parameters struct {
 	MemberColor  string
 	Min          complex128
 	Scaling      int
+	Power        int
 }
 
 /*
@@ -36,6 +37,7 @@ type Context struct {
 	MemberColor  color.NRGBA64
 	Min          complex128
 	Scaling      int
+	Power        int
 }
 
 func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
@@ -92,6 +94,7 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 				MemberColor:  mc,
 				Min:          p.Min,
 				Scaling:      p.Scaling,
+				Power:        p.Power,
 			}
 
 			c = append(c, &nc)

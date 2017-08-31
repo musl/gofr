@@ -24,6 +24,7 @@ func parameters() Parameters {
 		ColorFunc:    "mono",
 		EscapeRadius: 4.0,
 		MemberColor:  "#000000",
+		Power:        2,
 	}
 }
 
