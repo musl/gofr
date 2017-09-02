@@ -47,11 +47,11 @@ func ColorSmooth(c *Context, z complex128, x, y, i, max_i int) {
 	}
 
 	log_zn := math.Log(real(z)*real(z)+imag(z)*imag(z)) / 2.0
-	nu := math.Log(log_zn/math.Log(2.0)) / math.Log(2.0)
+	nu := math.Log(log_zn/math.Log(float64(c.Power))) / math.Log(float64(c.Power))
 	j := float64(i) + 1.0 - nu
 
 	o := math.Pi
-	f := math.Pi / 32.0
+	f := math.Pi / 32.0 * float64(c.Power)
 	t := f * math.Pi * float64(j)
 	r := uint16(0x7fff + 0x7fff*math.Sin(o+t))
 	g := uint16(0x7fff + 0x7fff*math.Sin(o+0.25*math.Pi+t))
@@ -68,7 +68,7 @@ func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 	}
 
 	o := math.Pi
-	f := float64(max_i) / 16.0
+	f := float64(max_i) / 16.0 * float64(c.Power)
 	t := f * math.Pi * (float64(i) / float64(max_i))
 	r := uint16(0x7fff + 0x7fff*math.Sin(o+t))
 	g := uint16(0x7fff + 0x7fff*math.Sin(o+0.25*math.Pi+t))
