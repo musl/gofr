@@ -14,6 +14,7 @@ Vendored Stuff:
 
 - Go
     - https://github.com/nfnt/resize
+    - https://github.com/google/uuid
 - JS
     - http://www.ractivejs.org/
     - https://ace.c9.io/
