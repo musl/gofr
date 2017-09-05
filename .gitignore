@@ -1,4 +1,4 @@
-gofrd
+cmd/gofrd/gofrd
 *.test
 *.out
 *.png
