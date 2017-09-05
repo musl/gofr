@@ -1,0 +1,6 @@
+gofrd
+*.test
+*.out
+*.png
+*.pprof
+*.pdf
