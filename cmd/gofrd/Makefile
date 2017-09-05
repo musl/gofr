@@ -1,17 +1,17 @@
-BIN := gofrd
+BIN := $(shell basename $(CURDIR))
 
 .PHONY: all clean run
 
 all: clean run
 
 clean:
-	go clean .
+	rm -f $(BIN)
 
-$(BIN):
+$(BIN): 
 	go build .
 
-gctrace: $(BIN)
-	GODEBUG=gctrace=2 ./$(BIN)
+test: $(BIN)
+	go test -v .
 
 run: $(BIN)
 	./$(BIN)
