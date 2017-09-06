@@ -4,7 +4,6 @@ all: clean lib
 
 clean:
 	go clean .
-	rm -f $(IMAGE_FILE)
 	rm -f *.out
 
 lib:
