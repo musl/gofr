@@ -24,6 +24,8 @@ func ColorFuncFromString(name string) (ColorFunc, error) {
 		return ColorMonoStripe, nil
 	case "parti":
 		return ColorParti, nil
+	case "superparti":
+		return ColorSuperParti, nil
 	case "check":
 		return ColorCheck, nil
 	case "e00":
@@ -149,7 +151,6 @@ func ColorParti(c *Context, z complex128, x, y, i, max_i int) {
 	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
 	black := color.NRGBA64{0, 0, 0, 0xffff}
 	red := color.NRGBA64{0xffff, 0, 0, 0xffff}
-	green := color.NRGBA64{0, 0xffff, 0, 0xffff}
 	blue := color.NRGBA64{0, 0, 0xffff, 0xffff}
 
 	if i == max_i {
@@ -160,13 +161,46 @@ func ColorParti(c *Context, z complex128, x, y, i, max_i int) {
 	p := cmplx.Phase(z)
 	if p > math.Pi/2.0 {
 		c.Image.SetNRGBA64(x, y, white)
-	} else if p > 0 {
+	} else if p >= 0 {
 		c.Image.SetNRGBA64(x, y, blue)
-	} else if p == 0 {
-		c.Image.SetNRGBA64(x, y, green)
 	} else if p > -1.0*math.Pi/2.0 {
 		c.Image.SetNRGBA64(x, y, red)
 	} else if p > -1.0*math.Pi {
+		c.Image.SetNRGBA64(x, y, black)
+	}
+}
+
+func ColorSuperParti(c *Context, z complex128, x, y, i, max_i int) {
+	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
+	black := color.NRGBA64{0, 0, 0, 0xffff}
+	red := color.NRGBA64{0xffff, 0, 0, 0xffff}
+	yellow := color.NRGBA64{0xffff, 0xffff, 0, 0xffff}
+	green := color.NRGBA64{0, 0xffff, 0, 0xffff}
+	cyan := color.NRGBA64{0, 0xffff, 0xffff, 0xffff}
+	blue := color.NRGBA64{0, 0, 0xffff, 0xffff}
+	magenta := color.NRGBA64{0xffff, 0, 0xffff, 0xffff}
+
+	if i == max_i {
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
+		return
+	}
+
+	p := cmplx.Phase(z)
+	if p > 3.0*math.Pi/4.0 {
+		c.Image.SetNRGBA64(x, y, white)
+	} else if p > math.Pi/2.0 {
+		c.Image.SetNRGBA64(x, y, red)
+	} else if p > math.Pi/4.0 {
+		c.Image.SetNRGBA64(x, y, yellow)
+	} else if p >= 0 {
+		c.Image.SetNRGBA64(x, y, green)
+	} else if p > math.Pi/-4.0 {
+		c.Image.SetNRGBA64(x, y, cyan)
+	} else if p > math.Pi/-2.0 {
+		c.Image.SetNRGBA64(x, y, blue)
+	} else if p > 3.0*math.Pi/-4.0 {
+		c.Image.SetNRGBA64(x, y, magenta)
+	} else if p > math.Pi {
 		c.Image.SetNRGBA64(x, y, black)
 	}
 }
