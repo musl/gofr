@@ -200,7 +200,7 @@ func ColorSuperParti(c *Context, z complex128, x, y, i, max_i int) {
 		c.Image.SetNRGBA64(x, y, blue)
 	} else if p > 3.0*math.Pi/-4.0 {
 		c.Image.SetNRGBA64(x, y, magenta)
-	} else if p > math.Pi {
+	} else if p > -1*math.Pi {
 		c.Image.SetNRGBA64(x, y, black)
 	}
 }
