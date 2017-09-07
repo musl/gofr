@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/musl/libgofr"
+	"github.com/musl/gofr/lib/gofr"
 	"github.com/nfnt/resize"
 	"image"
 	"image/png"

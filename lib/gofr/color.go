@@ -4,8 +4,13 @@ import (
 	"errors"
 	"image/color"
 	"math"
+	"math/cmplx"
 	"strconv"
 )
+
+func ftoui16(n float64) uint16 {
+	return uint16(0x7fff + 0x7fff*n)
+}
 
 func ColorFuncFromString(name string) (ColorFunc, error) {
 	switch name {
@@ -17,6 +22,12 @@ func ColorFuncFromString(name string) (ColorFunc, error) {
 		return ColorMono, nil
 	case "stripe":
 		return ColorMonoStripe, nil
+	case "parti":
+		return ColorParti, nil
+	case "check":
+		return ColorCheck, nil
+	case "e00":
+		return ColorExperiment00, nil
 	default:
 		return nil, errors.New("Invalid ColorFunc name.")
 	}
@@ -53,9 +64,9 @@ func ColorSmooth(c *Context, z complex128, x, y, i, max_i int) {
 	o := math.Pi
 	f := math.Pi / 32.0 * float64(c.Power)
 	t := f * math.Pi * float64(j)
-	r := uint16(0x7fff + 0x7fff*math.Sin(o+t))
-	g := uint16(0x7fff + 0x7fff*math.Sin(o+0.25*math.Pi+t))
-	b := uint16(0x7fff + 0x7fff*math.Cos(o+t))
+	r := ftoui16(math.Sin(o + t))
+	g := ftoui16(math.Sin(o + 0.25*math.Pi + t))
+	b := ftoui16(math.Cos(o + t))
 
 	l := color.NRGBA64{r, g, b, 0xffff}
 	c.Image.SetNRGBA64(x, y, l)
@@ -70,9 +81,9 @@ func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 	o := math.Pi
 	f := float64(max_i) / 16.0 * float64(c.Power)
 	t := f * math.Pi * (float64(i) / float64(max_i))
-	r := uint16(0x7fff + 0x7fff*math.Sin(o+t))
-	g := uint16(0x7fff + 0x7fff*math.Sin(o+0.25*math.Pi+t))
-	b := uint16(0x7fff + 0x7fff*math.Cos(o+t))
+	r := ftoui16(math.Sin(o + t))
+	g := ftoui16(math.Sin(o + 0.25*math.Pi + t))
+	b := ftoui16(math.Cos(o + t))
 
 	l := color.NRGBA64{r, g, b, 0xffff}
 	c.Image.SetNRGBA64(x, y, l)
@@ -114,4 +125,62 @@ func ColorMonoStripe(c *Context, z complex128, x, y, i, max_i int) {
 	} else {
 		c.Image.SetNRGBA64(x, y, black)
 	}
+}
+
+func ColorCheck(c *Context, z complex128, x, y, i, max_i int) {
+	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
+	black := color.NRGBA64{0, 0, 0, 0xffff}
+
+	if i == max_i {
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
+		return
+	}
+
+	p := cmplx.Phase(z)
+
+	if p >= 0 {
+		c.Image.SetNRGBA64(x, y, white)
+	} else {
+		c.Image.SetNRGBA64(x, y, black)
+	}
+}
+
+func ColorParti(c *Context, z complex128, x, y, i, max_i int) {
+	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
+	black := color.NRGBA64{0, 0, 0, 0xffff}
+	red := color.NRGBA64{0xffff, 0, 0, 0xffff}
+	green := color.NRGBA64{0, 0xffff, 0, 0xffff}
+	blue := color.NRGBA64{0, 0, 0xffff, 0xffff}
+
+	if i == max_i {
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
+		return
+	}
+
+	p := cmplx.Phase(z)
+	if p > math.Pi/2.0 {
+		c.Image.SetNRGBA64(x, y, white)
+	} else if p > 0 {
+		c.Image.SetNRGBA64(x, y, blue)
+	} else if p == 0 {
+		c.Image.SetNRGBA64(x, y, green)
+	} else if p > -1.0*math.Pi/2.0 {
+		c.Image.SetNRGBA64(x, y, red)
+	} else if p > -1.0*math.Pi {
+		c.Image.SetNRGBA64(x, y, black)
+	}
+}
+
+func ColorExperiment00(c *Context, z complex128, x, y, i, max_i int) {
+	if i == max_i {
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
+		return
+	}
+
+	r := ftoui16(math.Sin(cmplx.Abs(z)/c.EscapeRadius + cmplx.Phase(z)/math.Pi))
+	g := ftoui16(math.Sin(cmplx.Abs(z)/c.EscapeRadius + cmplx.Phase(z)/math.Pi))
+	b := ftoui16(math.Sin(cmplx.Abs(z)/c.EscapeRadius + cmplx.Phase(z)/math.Pi))
+
+	l := color.NRGBA64{r, g, b, 0xffff}
+	c.Image.SetNRGBA64(x, y, l)
 }
