@@ -285,13 +285,18 @@ func ColorExperiment1(ctx *Context, z complex128, x, y, i, max_i int) {
 		return
 	}
 
+	if (i-1)%3 == 0 {
+		ctx.Image.SetNRGBA64(x, y, Black)
+		return
+	}
+
 	log_zn := math.Log(real(z)*real(z)+imag(z)*imag(z)) / 2.0
 	nu := math.Log(log_zn/math.Log(float64(ctx.Power))) / math.Log(float64(ctx.Power))
 	j := float64(i) + 1.0 - nu
 
 	h := 0.5 + 0.5*math.Sin(0.125*math.Pi*j)
 	c := 1.0
-	l := 0.8 + 0.2*math.Pow(math.Sin(0.5*math.Pi*j), 8)
+	l := 0.6
 
 	ctx.Image.SetNRGBA64(x, y, HclaToNRGBA64(h, c, l, 1.0))
 }
