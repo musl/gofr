@@ -8,6 +8,18 @@ import (
 	"strconv"
 )
 
+var (
+	Accent  = color.NRGBA64{0, 0xa000, 0xc000, 0xffff}
+	White   = color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
+	Black   = color.NRGBA64{0, 0, 0, 0xffff}
+	Red     = color.NRGBA64{0xffff, 0, 0, 0xffff}
+	Yellow  = color.NRGBA64{0xffff, 0xffff, 0, 0xffff}
+	Green   = color.NRGBA64{0, 0xffff, 0, 0xffff}
+	Cyan    = color.NRGBA64{0, 0xffff, 0xffff, 0xffff}
+	Blue    = color.NRGBA64{0, 0, 0xffff, 0xffff}
+	Magenta = color.NRGBA64{0xffff, 0, 0xffff, 0xffff}
+)
+
 func ftoui16(n float64) uint16 {
 	return uint16(0x7fff + 0x7fff*n)
 }
@@ -92,47 +104,37 @@ func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 }
 
 func ColorMono(c *Context, z complex128, x, y, i, max_i int) {
-	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
-	black := color.NRGBA64{0, 0, 0, 0xffff}
-
 	if i == max_i {
 		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
 	}
 
 	if i&1 == 0 {
-		c.Image.SetNRGBA64(x, y, white)
+		c.Image.SetNRGBA64(x, y, White)
 	} else {
-		c.Image.SetNRGBA64(x, y, black)
+		c.Image.SetNRGBA64(x, y, Black)
 	}
 }
 
 func ColorMonoStripe(c *Context, z complex128, x, y, i, max_i int) {
-	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
-	black := color.NRGBA64{0, 0, 0, 0xffff}
-	accent := color.NRGBA64{0, 0xa000, 0xc000, 0xffff}
-
 	if i == max_i {
 		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
 	}
 
 	if (i-1)%9 == 0 {
-		c.Image.SetNRGBA64(x, y, accent)
+		c.Image.SetNRGBA64(x, y, Accent)
 		return
 	}
 
 	if i&1 == 0 {
-		c.Image.SetNRGBA64(x, y, white)
+		c.Image.SetNRGBA64(x, y, White)
 	} else {
-		c.Image.SetNRGBA64(x, y, black)
+		c.Image.SetNRGBA64(x, y, Black)
 	}
 }
 
 func ColorCheck(c *Context, z complex128, x, y, i, max_i int) {
-	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
-	black := color.NRGBA64{0, 0, 0, 0xffff}
-
 	if i == max_i {
 		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
@@ -141,18 +143,13 @@ func ColorCheck(c *Context, z complex128, x, y, i, max_i int) {
 	p := cmplx.Phase(z)
 
 	if p >= 0 {
-		c.Image.SetNRGBA64(x, y, white)
+		c.Image.SetNRGBA64(x, y, White)
 	} else {
-		c.Image.SetNRGBA64(x, y, black)
+		c.Image.SetNRGBA64(x, y, Black)
 	}
 }
 
 func ColorParti(c *Context, z complex128, x, y, i, max_i int) {
-	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
-	black := color.NRGBA64{0, 0, 0, 0xffff}
-	red := color.NRGBA64{0xffff, 0, 0, 0xffff}
-	blue := color.NRGBA64{0, 0, 0xffff, 0xffff}
-
 	if i == max_i {
 		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
@@ -160,26 +157,17 @@ func ColorParti(c *Context, z complex128, x, y, i, max_i int) {
 
 	p := cmplx.Phase(z)
 	if p > math.Pi/2.0 {
-		c.Image.SetNRGBA64(x, y, white)
+		c.Image.SetNRGBA64(x, y, White)
 	} else if p >= 0 {
-		c.Image.SetNRGBA64(x, y, blue)
+		c.Image.SetNRGBA64(x, y, Blue)
 	} else if p > -1.0*math.Pi/2.0 {
-		c.Image.SetNRGBA64(x, y, red)
+		c.Image.SetNRGBA64(x, y, Red)
 	} else if p > -1.0*math.Pi {
-		c.Image.SetNRGBA64(x, y, black)
+		c.Image.SetNRGBA64(x, y, Black)
 	}
 }
 
 func ColorSuperParti(c *Context, z complex128, x, y, i, max_i int) {
-	white := color.NRGBA64{0xffff, 0xffff, 0xffff, 0xffff}
-	black := color.NRGBA64{0, 0, 0, 0xffff}
-	red := color.NRGBA64{0xffff, 0, 0, 0xffff}
-	yellow := color.NRGBA64{0xffff, 0xffff, 0, 0xffff}
-	green := color.NRGBA64{0, 0xffff, 0, 0xffff}
-	cyan := color.NRGBA64{0, 0xffff, 0xffff, 0xffff}
-	blue := color.NRGBA64{0, 0, 0xffff, 0xffff}
-	magenta := color.NRGBA64{0xffff, 0, 0xffff, 0xffff}
-
 	if i == max_i {
 		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
@@ -187,21 +175,21 @@ func ColorSuperParti(c *Context, z complex128, x, y, i, max_i int) {
 
 	p := cmplx.Phase(z)
 	if p > 3.0*math.Pi/4.0 {
-		c.Image.SetNRGBA64(x, y, white)
+		c.Image.SetNRGBA64(x, y, White)
 	} else if p > math.Pi/2.0 {
-		c.Image.SetNRGBA64(x, y, red)
+		c.Image.SetNRGBA64(x, y, Red)
 	} else if p > math.Pi/4.0 {
-		c.Image.SetNRGBA64(x, y, yellow)
+		c.Image.SetNRGBA64(x, y, Yellow)
 	} else if p >= 0 {
-		c.Image.SetNRGBA64(x, y, green)
+		c.Image.SetNRGBA64(x, y, Green)
 	} else if p > math.Pi/-4.0 {
-		c.Image.SetNRGBA64(x, y, cyan)
+		c.Image.SetNRGBA64(x, y, Cyan)
 	} else if p > math.Pi/-2.0 {
-		c.Image.SetNRGBA64(x, y, blue)
+		c.Image.SetNRGBA64(x, y, Blue)
 	} else if p > 3.0*math.Pi/-4.0 {
-		c.Image.SetNRGBA64(x, y, magenta)
+		c.Image.SetNRGBA64(x, y, Magenta)
 	} else if p > -1*math.Pi {
-		c.Image.SetNRGBA64(x, y, black)
+		c.Image.SetNRGBA64(x, y, Black)
 	}
 }
 
