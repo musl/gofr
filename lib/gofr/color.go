@@ -262,7 +262,7 @@ func ColorIce(ctx *Context, z complex128, x, y, i, max_i int) {
 	colorSmoothMono(ctx, z, x, y, i, max_i, 0.6)
 }
 
-func UnicornRainbow(ctx *Context, z complex128, x, y, i, max_i int) {
+func ColorUnicornRainbow(ctx *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
 		ctx.Image.SetNRGBA64(x, y, ctx.MemberColor)
 		return
