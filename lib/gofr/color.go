@@ -62,6 +62,8 @@ func ColorFuncFromString(name string) (ColorFunc, error) {
 		return ColorFire, nil
 	case "ice":
 		return ColorIce, nil
+	case "unicornrainbow":
+		return ColorUnicornRainbow, nil
 	case "e1":
 		return ColorExperiment1, nil
 	default:
@@ -236,7 +238,7 @@ func ColorSoftSpectrum(ctx *Context, z complex128, x, y, i, max_i int) {
 	ctx.Image.SetNRGBA64(x, y, HclaToNRGBA64(h, c, l, 1.0))
 }
 
-func ColorFire(ctx *Context, z complex128, x, y, i, max_i int) {
+func colorSmoothMono(ctx *Context, z complex128, x, y, i, max_i int, hue float64) {
 	if i == max_i {
 		ctx.Image.SetNRGBA64(x, y, ctx.MemberColor)
 		return
@@ -246,14 +248,21 @@ func ColorFire(ctx *Context, z complex128, x, y, i, max_i int) {
 	nu := math.Log(log_zn/math.Log(float64(ctx.Power))) / math.Log(float64(ctx.Power))
 	j := float64(i) + 1.0 - nu
 
-	h := 0.15
 	c := 0.5 + 0.5*math.Sin(0.0625*math.Pi*j)
 	l := 0.5 + 0.5*math.Sin(0.03125*math.Pi*j)
 
-	ctx.Image.SetNRGBA64(x, y, HclaToNRGBA64(h, c, l, 1.0))
+	ctx.Image.SetNRGBA64(x, y, HclaToNRGBA64(hue, c, l, 1.0))
+}
+
+func ColorFire(ctx *Context, z complex128, x, y, i, max_i int) {
+	colorSmoothMono(ctx, z, x, y, i, max_i, 0.15)
 }
 
 func ColorIce(ctx *Context, z complex128, x, y, i, max_i int) {
+	colorSmoothMono(ctx, z, x, y, i, max_i, 0.6)
+}
+
+func UnicornRainbow(ctx *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
 		ctx.Image.SetNRGBA64(x, y, ctx.MemberColor)
 		return
@@ -263,9 +272,9 @@ func ColorIce(ctx *Context, z complex128, x, y, i, max_i int) {
 	nu := math.Log(log_zn/math.Log(float64(ctx.Power))) / math.Log(float64(ctx.Power))
 	j := float64(i) + 1.0 - nu
 
-	h := 0.6
-	c := 0.5 + 0.5*math.Sin(0.0625*math.Pi*j)
-	l := 0.5 + 0.5*math.Sin(0.03125*math.Pi*j)
+	h := 0.5 + 0.5*math.Sin(0.125*math.Pi*j)
+	c := 1.0
+	l := 0.8 + 0.2*math.Pow(math.Sin(0.5*math.Pi*j), 8)
 
 	ctx.Image.SetNRGBA64(x, y, HclaToNRGBA64(h, c, l, 1.0))
 }
@@ -280,9 +289,9 @@ func ColorExperiment1(ctx *Context, z complex128, x, y, i, max_i int) {
 	nu := math.Log(log_zn/math.Log(float64(ctx.Power))) / math.Log(float64(ctx.Power))
 	j := float64(i) + 1.0 - nu
 
-	h := 0.6
-	c := 0.5 + 0.5*math.Sin(0.0625*math.Pi*j)
-	l := 0.5 + 0.5*math.Sin(0.03125*math.Pi*j)
+	h := 0.5 + 0.5*math.Sin(0.125*math.Pi*j)
+	c := 1.0
+	l := 0.8 + 0.2*math.Pow(math.Sin(0.5*math.Pi*j), 8)
 
 	ctx.Image.SetNRGBA64(x, y, HclaToNRGBA64(h, c, l, 1.0))
 }
