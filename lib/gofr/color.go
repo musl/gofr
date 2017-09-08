@@ -2,6 +2,7 @@ package gofr
 
 import (
 	"errors"
+	"github.com/lucasb-eyer/go-colorful"
 	"image/color"
 	"math"
 	"math/cmplx"
@@ -24,6 +25,19 @@ func ftoui16(n float64) uint16 {
 	return uint16(0x7fff + 0x7fff*n)
 }
 
+func word(n float64) uint16 {
+	return uint16(0xffff * n)
+}
+
+// value ranges:
+// h: 0-1
+// c: 0-1
+// l: 0-1
+func HclToNRGBA64(h, c, l float64) color.NRGBA64 {
+	r, g, b, a := colorful.Hcl(h*360.0, c, l).RGBA()
+	return color.NRGBA64{uint16(r), uint16(g), uint16(b), uint16(a)}
+}
+
 func ColorFuncFromString(name string) (ColorFunc, error) {
 	switch name {
 	case "smooth":
@@ -40,8 +54,8 @@ func ColorFuncFromString(name string) (ColorFunc, error) {
 		return ColorSuperParti, nil
 	case "check":
 		return ColorCheck, nil
-	case "e00":
-		return ColorExperiment00, nil
+	case "e1":
+		return ColorExperiment1, nil
 	default:
 		return nil, errors.New("Invalid ColorFunc name.")
 	}
@@ -75,15 +89,18 @@ func ColorSmooth(c *Context, z complex128, x, y, i, max_i int) {
 	nu := math.Log(log_zn/math.Log(float64(c.Power))) / math.Log(float64(c.Power))
 	j := float64(i) + 1.0 - nu
 
-	o := math.Pi
-	f := math.Pi / 32.0 * float64(c.Power)
-	t := f * math.Pi * float64(j)
-	r := ftoui16(math.Sin(o + t))
-	g := ftoui16(math.Sin(o + 0.25*math.Pi + t))
-	b := ftoui16(math.Cos(o + t))
+	// TODO: this kinda looks like the bands coloring algorithm, but
+	// doesn't match. the 4.75 factor is a guess.
+	t := (math.Pi / (4.75 * float64(c.Power))) * j
 
-	l := color.NRGBA64{r, g, b, 0xffff}
-	c.Image.SetNRGBA64(x, y, l)
+	k := color.NRGBA64{
+		ftoui16(math.Sin(math.Pi + t)),
+		ftoui16(math.Sin(math.Pi + 0.25*math.Pi + t)),
+		ftoui16(math.Cos(math.Pi + t)),
+		0xffff,
+	}
+
+	c.Image.SetNRGBA64(x, y, k)
 }
 
 func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
@@ -92,15 +109,16 @@ func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 		return
 	}
 
-	o := math.Pi
-	f := float64(max_i) / 16.0 * float64(c.Power)
-	t := f * math.Pi * (float64(i) / float64(max_i))
-	r := ftoui16(math.Sin(o + t))
-	g := ftoui16(math.Sin(o + 0.25*math.Pi + t))
-	b := ftoui16(math.Cos(o + t))
+	t := (float64(max_i) / math.Pi) * (float64(i) / float64(max_i))
 
-	l := color.NRGBA64{r, g, b, 0xffff}
-	c.Image.SetNRGBA64(x, y, l)
+	k := color.NRGBA64{
+		ftoui16(math.Sin(math.Pi + t)),
+		ftoui16(math.Sin(math.Pi + 0.25*math.Pi + t)),
+		ftoui16(math.Cos(math.Pi + t)),
+		0xffff,
+	}
+
+	c.Image.SetNRGBA64(x, y, k)
 }
 
 func ColorMono(c *Context, z complex128, x, y, i, max_i int) {
@@ -193,16 +211,15 @@ func ColorSuperParti(c *Context, z complex128, x, y, i, max_i int) {
 	}
 }
 
-func ColorExperiment00(c *Context, z complex128, x, y, i, max_i int) {
+func ColorExperiment1(c *Context, z complex128, x, y, i, max_i int) {
 	if i == max_i {
 		c.Image.SetNRGBA64(x, y, c.MemberColor)
 		return
 	}
 
-	r := ftoui16(math.Sin(cmplx.Abs(z)/c.EscapeRadius + cmplx.Phase(z)/math.Pi))
-	g := ftoui16(math.Sin(cmplx.Abs(z)/c.EscapeRadius + cmplx.Phase(z)/math.Pi))
-	b := ftoui16(math.Sin(cmplx.Abs(z)/c.EscapeRadius + cmplx.Phase(z)/math.Pi))
+	log_zn := math.Log(real(z)*real(z)+imag(z)*imag(z)) / 2.0
+	nu := math.Log(log_zn/math.Log(float64(c.Power))) / math.Log(float64(c.Power))
+	j := float64(i) + 1.0 - nu
 
-	l := color.NRGBA64{r, g, b, 0xffff}
-	c.Image.SetNRGBA64(x, y, l)
+	c.Image.SetNRGBA64(x, y, HclToNRGBA64(math.Sin(j), 1.0, 0.0))
 }
