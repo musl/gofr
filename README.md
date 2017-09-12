@@ -43,3 +43,15 @@ Mandelbrot set.
     - [http://purecss.io/](http://purecss.io/)
     - [http://fontawesome.io/](http://fontawesome.io/)
 
+## Docs
+
+- [lib/gofr](http://godoc.org/github.com/musl/gofr/lib/gofr)
+
+- [cmd/gofrd](http://godoc.org/github.com/musl/gofr/cmd/gofrd)
+    
+    The binary is more or less a [12-factor app](http://12factor.net)
+    that accepts configuration via the environment:
+
+    - `GOFR_STATIC_DIR`: The path to the static assets for gofrd.  Default: `./static`
+    - `GOFR_BIND_ADDR`: The address and port to bind to. Default: `0.0.0.0:8000`
+
