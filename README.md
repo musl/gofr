@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/musl/gofr.svg?branch=master)](https://travis-ci.org/musl/gofr)
+
 # gofr
 
 This is a rendering service and UI for browsing the fractal goodnees of the
