@@ -1,5 +1,4 @@
 /cmd/gofrd/gofrd
-/vendor/**/.git
 *.test
 *.out
 *.png
