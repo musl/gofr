@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/musl/gofr.svg?branch=master)](https://travis-ci.org/musl/gofr)
+[![GoDoc](https://godoc.org/github.com/musl/gofr/lib/gofr?status.svg)](http://godoc.org/github.com/musl/gofr/lib/gofr)
+[![GoDoc](https://godoc.org/github.com/musl/gofr/cmd/gofrd?status.svg)](http://godoc.org/github.com/musl/gofr/cmd/gofrd)
 
 # gofr
 
