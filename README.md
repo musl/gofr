@@ -13,7 +13,7 @@ Mandelbrot set.
 
     If you run into problems, check or set up your go directory and `GOPATH` with the instructions here: [https://golang.org/doc/code.html](https://golang.org/doc/code.html)
 
-1. Run the service: `gofrd`
+1. Run the service: `GOFR_STATIC_DIR=$GOPATH/src/github.com/musl/gofr/cmd/gofrd/static gofrd`
 
     (or `$GOPATH/bin/gofrd` if `$GOPATH/bin` isn't in your `PATH`)
 
