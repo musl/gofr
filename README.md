@@ -13,9 +13,9 @@ Mandelbrot set.
 
     If you run into problems, check or set up your go directory and `GOPATH` with the instructions here: [https://golang.org/doc/code.html](https://golang.org/doc/code.html)
 
-1. Run the service: `GOFR_STATIC_DIR=$GOPATH/src/github.com/musl/gofr/cmd/gofrd/static gofrd`
+1. Run the service:
 
-    (or `$GOPATH/bin/gofrd` if `$GOPATH/bin` isn't in your `PATH`)
+    `GOFR_STATIC_DIR=$GOPATH/src/github.com/musl/gofr/cmd/gofrd/static $GOPATH/bin/gofrd`
 
 1. Browse to: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
