@@ -44,8 +44,9 @@ func wrapHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		lrw := NewLogResponseWriter(w)
 
+		lrw.Log(fmt.Sprintf("%s -> %s %s", r.Method, r.URL.Path, r.RemoteAddr))
 		h.ServeHTTP(lrw, r)
-		lrw.Log(fmt.Sprintf("%d %s %s %s", lrw.Status, r.Method, r.URL.Path, r.RemoteAddr))
+		lrw.Log(fmt.Sprintf("%d <- %s %s %s", lrw.Status, r.Method, r.URL.Path, r.RemoteAddr))
 	})
 }
 
@@ -60,6 +61,10 @@ func finish(w http.ResponseWriter, status int, message string) {
 
 func route_png(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New()
+
+	// TODO either check a table for currently rendering IDs and return
+	// HTTP 429 (one request per id in flight), or cancel the existing,
+	// running request and continue this one.
 
 	if r.Method != "GET" {
 		finish(w, http.StatusMethodNotAllowed, "Method not allowed.")
