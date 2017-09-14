@@ -19,8 +19,6 @@ import (
 
 const Version = "0.0.2"
 
-var id_chan = make(chan uuid.UUID, 100)
-
 type LogResponseWriter struct {
 	http.ResponseWriter
 	Status int
@@ -61,7 +59,7 @@ func finish(w http.ResponseWriter, status int, message string) {
 }
 
 func route_png(w http.ResponseWriter, r *http.Request) {
-	id := <-id_chan
+	id := uuid.New()
 
 	if r.Method != "GET" {
 		finish(w, http.StatusMethodNotAllowed, "Method not allowed.")
@@ -189,12 +187,6 @@ func main() {
 		bind_addr = value
 	}
 	log.Printf("Listening on: %s\n", bind_addr)
-
-	go func() {
-		for i := 0; ; i++ {
-			id_chan <- uuid.New()
-		}
-	}()
 
 	http.Handle("/", wrapHandler(http.FileServer(http.Dir(static_dir))))
 	http.Handle("/png", wrapHandlerFunc(route_png))
