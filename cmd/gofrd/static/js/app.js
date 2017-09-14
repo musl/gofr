@@ -9,6 +9,13 @@ Gofr.helpers.complex = function(r, i) {
   return r + (i < 0 ? "" : "+") + i + "i";
 };
 
+Gofr.uuid = function() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 Gofr.ModalEditor = Ractive.extend({
   template: '#editor-tmpl',
   data: function() {
@@ -59,6 +66,8 @@ Gofr.FractalBrowser = Ractive.extend({
       width: 960,
       height: 960,
       view: {},
+      view_history: [],
+      view_history_max: 3,
       default_view: {
         editable: false,
         i: 300,
@@ -70,17 +79,18 @@ Gofr.FractalBrowser = Ractive.extend({
         rmin: -2.1,
         rmax: 0.6,
         imin: -1.25,
-        imax: 1.25
+        imax: 1.25,
       },
       bookmarks: {},
-      view_url: this.view_url
+      render_id: '',
+      view_url: this.view_url,
     };
   },
   components: {
     editor: Gofr.ModalEditor
   },
   onrender: function() {
-    var marks, self, view;
+    var marks, self, view, render_id;
 
     self = this;
 
@@ -100,50 +110,77 @@ Gofr.FractalBrowser = Ractive.extend({
       this.copy_view('default_view', 'bookmarks.home');
     }
 
+    render_id = JSON.parse(Gofr.storage.getItem('gofr.browser.render_id'));
+    if(render_id) {
+      this.set('render_id', render_id);
+    } else {
+      this.set('render_id', Gofr.uuid());
+    }
+
     this.canvas = $(this.find('canvas'));
     this.ctx = this.canvas[0].getContext('2d');
 
     this.ring = $(this.find('div#ring'));
     window.ring = this.ring;
 
+    this.update_view();
   },
   oncomplete: function() {
     this.observe('view', function() {
-      this.update_view();
       Gofr.storage.setItem('gofr.browser.view', this.json('view'));
+    });
+
+    this.observe('view_history', function() {
+      Gofr.storage.setItem('gofr.browser.view_history', this.json('view_history'));
     });
 
     this.observe('bookmarks', function() {
       Gofr.storage.setItem('gofr.browser.marks', this.json('bookmarks'));
     });
 
+    this.observe('render_id', function() {
+      Gofr.storage.setItem('gofr.browser.render_id', this.json('render_id'));
+    });
+
     this.on({
       move_up: function() {
         this.translate_view(0.0, -0.0625 * (this.get('view.imax') - this.get('view.imin')));
+        this.update_view();
       },
       move_down: function() {
         this.translate_view(0.0, 0.0625 * (this.get('view.imax') - this.get('view.imin')));
+        this.update_view();
       },
       move_left: function() {
         this.translate_view(-0.0625 * (this.get('view.rmax') - this.get('view.rmin')), 0.0);
+        this.update_view();
       },
       move_right: function() {
         this.translate_view(0.0625 * (this.get('view.rmax') - this.get('view.rmin')), 0.0);
+        this.update_view();
       },
       zoom_in: function() {
         this.scale_view(0.9);
+        this.update_view();
       },
       zoom_in_4x: function() {
         this.scale_view(0.6);
+        this.update_view();
       },
       zoom_out: function() {
         this.scale_view(1.1);
+        this.update_view();
       },
       zoom_out_4x: function() {
         this.scale_view(1.4);
+        this.update_view();
       },	
       update_view: function() {
         this.update_view();
+      },
+      go_back: function() {
+        this.set('view', this.get('view_history').pop());
+        this.update_view(true);
       },
       go_to_bookmark: function(event) {
         var bookmark, name;
@@ -151,6 +188,7 @@ Gofr.FractalBrowser = Ractive.extend({
         name = 'bookmarks.' + $(event.node).data('bookmark');
         if(!name in this.get('bookmarks')) { return; }
         this.copy_view(name, 'view');
+        this.update_view();
       },
       add_bookmark: function(event) {
         var name;
@@ -191,6 +229,7 @@ Gofr.FractalBrowser = Ractive.extend({
       },
       'editor.saved': function(key, text) {
         this.set(key, JSON.parse(text));
+        this.update_view();
       },
       mouse: function(ractive_event) {
         var self;
@@ -246,6 +285,7 @@ Gofr.FractalBrowser = Ractive.extend({
             v.imax = i + di * y1;
             self.update('view');
 
+            self.update_view();
             return;
           }
 
@@ -267,9 +307,9 @@ Gofr.FractalBrowser = Ractive.extend({
     return JSON.stringify(this.get(key), null, 2);
   },
   view_url: function(name) {
-    return "/png?" + $.param(this.get('view'));
+    return "/png?" + $.param(this.get('view')) + '&render_id=' + this.get('render_id');
   },
-  update_view: function() {
+  update_view: function(dont_update_history) {
     var image, self;
 
     self = this;
@@ -287,6 +327,17 @@ Gofr.FractalBrowser = Ractive.extend({
     };
     this.ring.show();
     i.src = this.view_url();
+
+    if(dont_update_history) return;
+    this.update_history();
+  },
+  update_history: function () {
+    vh = this.get('view_history');
+
+    vh.unshift(JSON.parse(this.json('view')));
+    while(vh.length > this.get('view_history_max')) {
+      vh.pop();
+    }
   },
   translate_view: function(r, i) {
     var view;
@@ -318,24 +369,7 @@ Gofr.FractalBrowser = Ractive.extend({
     this.update('view');
   },
   copy_view: function(src_key, dst_key) {
-    var view;
-
-    view = this.get(src_key);
-
-    this.set(dst_key, {
-      w: view.w,
-      h: view.h,
-      i: view.i,
-      e: view.e,
-      m: view.m,
-      c: view.c,
-      s: view.s,
-      p: view.p,
-      rmin: view.rmin,
-      rmax: view.rmax,
-      imin: view.imin,
-      imax: view.imax,
-    });
+    this.set(dst_key, JSON.parse(this.json(src_key)));
   },
 });
 Ractive.components.browser = Gofr.FractalBrowser;
