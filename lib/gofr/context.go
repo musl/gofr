@@ -9,8 +9,11 @@ import (
  * Easily serializeable parameters for rendering images.
  */
 type Parameters struct {
+	RenderFunc   string
 	ColorFunc    string
 	EscapeRadius float64
+	Width        uint
+	Height       uint
 	ImageHeight  int
 	ImageWidth   int
 	Max          complex128
@@ -26,6 +29,8 @@ type Parameters struct {
  * work for a render job to be run in one thread.
  */
 type Context struct {
+	Cancel       chan bool
+	RenderFunc   RenderFunc
 	ColorFunc    ColorFunc
 	EscapeRadius float64
 	Id           int
@@ -61,6 +66,11 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 		panic(err)
 	}
 
+	rf, err := RenderFuncFromString(p.RenderFunc)
+	if err != nil {
+		panic(err)
+	}
+
 	if n <= 0 {
 		panic("I refuse to make zero or fewer contexts of an image.")
 	}
@@ -83,6 +93,7 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 
 			sub := im.SubImage(image.Rect(x, y, x+w, y+h)).(*image.NRGBA64)
 			nc := Context{
+				RenderFunc:   rf,
 				ColorFunc:    cf,
 				EscapeRadius: p.EscapeRadius,
 				Id:           (i * n) + j,
@@ -125,7 +136,7 @@ type ContextFunc func(int, int, complex128)
 /*
 * Iterate over the map of pixel coordinates and complex points.
  */
-func (self *Context) EachPoint(fn ContextFunc) {
+func (self *Context) EachPoint(fn ContextFunc, cancel chan bool) {
 	rmin := self.Image.Bounds().Min
 	rmax := self.Image.Bounds().Max
 	cmin := self.Min
@@ -136,6 +147,12 @@ func (self *Context) EachPoint(fn ContextFunc) {
 		for y := rmin.Y; y < rmax.Y; y++ {
 			z = complex(real(cmin)+float64(x)*dx, imag(cmin)+float64(y)*dy)
 			fn(x, y, z)
+
+			select {
+			case <-cancel:
+				return
+			default:
+			}
 		}
 	}
 }

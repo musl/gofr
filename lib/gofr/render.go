@@ -1,16 +1,29 @@
 package gofr
 
-type RenderFunc func(*Context) int
+import (
+	"fmt"
+)
 
-func Render(ncpus int, contexts []*Context, render RenderFunc) {
-	jobs := make(chan *Context, len(contexts))
-	results := make(chan int, len(contexts))
-	i := 0
+type RenderFunc func(*Context, chan bool) int
 
-	for i = 0; i < ncpus; i++ {
+func RenderFuncFromString(name string) (RenderFunc, error) {
+	switch name {
+	case "mandelbrot":
+		return Mandelbrot, nil
+	default:
+		return nil, fmt.Errorf("Invalid RenderFunc name: %#v", name)
+	}
+}
+
+func Render(threads int, contexts []*Context, cancel chan bool) error {
+	count := len(contexts)
+	jobs := make(chan *Context, count)
+	results := make(chan int, count)
+
+	for i := 0; i < threads; i++ {
 		go func() {
 			for job := range jobs {
-				results <- render(job)
+				results <- job.RenderFunc(job, cancel)
 			}
 		}()
 	}
@@ -20,8 +33,17 @@ func Render(ncpus int, contexts []*Context, render RenderFunc) {
 	}
 	close(jobs)
 
-	for i = 0; i < len(contexts); i++ {
-		<-results
+	r := 0
+	for {
+		select {
+		case <-results:
+			r++
+			if r == count {
+				return nil
+			}
+		case <-cancel:
+			return fmt.Errorf("Render job cancelled.")
+		default:
+		}
 	}
-	close(results)
 }

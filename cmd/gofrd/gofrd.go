@@ -14,10 +14,33 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 )
 
 const Version = "0.0.2"
+
+var render_jobs = make(map[string]RenderJob)
+var render_jobs_mutex = &sync.Mutex{}
+
+type RenderJob struct {
+	Parameters gofr.Parameters
+	Cancel     chan bool
+	Threads    int
+}
+
+func (self *RenderJob) Render() (image.Image, error) {
+	img := image.NewNRGBA64(image.Rect(0, 0, self.Parameters.ImageWidth, self.Parameters.ImageHeight))
+	contexts := gofr.MakeContexts(img, self.Threads, &self.Parameters)
+
+	err := gofr.Render(self.Threads, contexts, self.Cancel)
+	if err != nil {
+		return nil, err
+	}
+
+	image := resize.Resize(self.Parameters.Width, self.Parameters.Height, image.Image(img), resize.Lanczos3)
+	return image, nil
+}
 
 type LogResponseWriter struct {
 	http.ResponseWriter
@@ -131,39 +154,55 @@ func route_png(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := q.Get("c")
-	hex := q.Get("m")
-
-	p := gofr.Parameters{
-		ImageWidth:   width * s,
-		ImageHeight:  height * s,
-		MaxI:         iterations,
-		EscapeRadius: er,
-		Min:          complex(rmin, imin),
-		Max:          complex(rmax, imax),
-		ColorFunc:    c,
-		MemberColor:  hex,
-		Power:        e,
+	j := RenderJob{
+		Parameters: gofr.Parameters{
+			Width:        uint(width),
+			Height:       uint(height),
+			ImageWidth:   width * s,
+			ImageHeight:  height * s,
+			MaxI:         iterations,
+			EscapeRadius: er,
+			Min:          complex(rmin, imin),
+			Max:          complex(rmax, imax),
+			RenderFunc:   q.Get("r"),
+			ColorFunc:    q.Get("c"),
+			MemberColor:  q.Get("m"),
+			Power:        e,
+		},
+		Threads: runtime.NumCPU(),
+		Cancel:  make(chan bool),
 	}
 
-	// TODO: Check parameters and set reasonable bounds on what we can
-	// quickly calculate.
-	//
-	// Create a pool of goroutines that process render jobs, with a
-	// time-out for accepting render jobs. Have UI support for the "try
-	// again later" response.
+	render_id := q.Get("render_id")
+	if render_id == "" {
+		finish(w, http.StatusUnprocessableEntity, "Missing render_id")
+		return
+	}
 
-	img := image.NewNRGBA64(image.Rect(0, 0, p.ImageWidth, p.ImageHeight))
-	n := runtime.NumCPU()
-	contexts := gofr.MakeContexts(img, n, &p)
-	gofr.Render(n, contexts, gofr.Mandelbrot)
+	defer func() {
+		render_jobs_mutex.Lock()
+		delete(render_jobs, render_id)
+		render_jobs_mutex.Unlock()
+	}()
 
-	scaled_img := resize.Resize(uint(width), uint(height), image.Image(img), resize.Lanczos3)
+	render_jobs_mutex.Lock()
+	if _, exists := render_jobs[render_id]; exists {
+		close(render_jobs[render_id].Cancel)
+		delete(render_jobs, render_id)
+	}
+	render_jobs[render_id] = j
+	render_jobs_mutex.Unlock()
+
+	image, err := j.Render()
+	if err != nil {
+		finish(w, http.StatusTooManyRequests, err.Error())
+		return
+	}
 
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("X-Render-Job-ID", id.String())
 	w.WriteHeader(http.StatusOK)
-	png.Encode(w, scaled_img)
+	png.Encode(w, image)
 }
 
 func route_status(w http.ResponseWriter, r *http.Request) {

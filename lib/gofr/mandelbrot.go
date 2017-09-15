@@ -4,13 +4,13 @@ import (
 	"math"
 )
 
-func Mandelbrot(c *Context) int {
+func Mandelbrot(c *Context, cancel chan bool) int {
 	max_i := c.MaxI
 	fn := func(x, y int, z complex128) {
 		i, zn := Escape(c, z, max_i)
 		c.ColorFunc(c, zn, x, y, i, max_i)
 	}
-	c.EachPoint(fn)
+	c.EachPoint(fn, cancel)
 	return 0
 }
 

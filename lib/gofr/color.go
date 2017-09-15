@@ -1,7 +1,7 @@
 package gofr
 
 import (
-	"errors"
+	"fmt"
 	"github.com/lucasb-eyer/go-colorful"
 	"image/color"
 	"math"
@@ -67,7 +67,7 @@ func ColorFuncFromString(name string) (ColorFunc, error) {
 	case "e1":
 		return ColorExperiment1, nil
 	default:
-		return nil, errors.New("Invalid ColorFunc name.")
+		return nil, fmt.Errorf("Invalid ColorFunc name: %#v", name)
 	}
 }
 

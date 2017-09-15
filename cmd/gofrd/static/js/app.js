@@ -74,6 +74,7 @@ Gofr.FractalBrowser = Ractive.extend({
         e: 4.0,
         m: '#444444',
         c: 'stripe',
+        r: 'mandelbrot',
         s: 2.0,
         p: 2,
         rmin: -2.1,
