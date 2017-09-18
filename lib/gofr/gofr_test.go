@@ -13,7 +13,7 @@ var n_cpu = runtime.NumCPU()
 func parameters() Parameters {
 	a := complex(-2.6, -2.1)
 	b := complex(1.6, 2.1)
-	w := 8192
+	w := 512
 	h := int(float64(w) * (imag(b) - imag(a)) / (real(b) - real(a)))
 
 	return Parameters{
