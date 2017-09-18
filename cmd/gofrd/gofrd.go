@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const Version = "0.1.0"
+const Version = "0.1.1"
 
 var render_jobs = make(map[string]RenderJob)
 var render_jobs_mutex = &sync.Mutex{}
