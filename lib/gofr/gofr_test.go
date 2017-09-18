@@ -3,6 +3,7 @@ package gofr
 import (
 	"image"
 	"math/rand"
+	"regexp"
 	"runtime"
 	"testing"
 )
@@ -22,6 +23,7 @@ func parameters() Parameters {
 		Max:          b,
 		MaxI:         1000,
 		ColorFunc:    "mono",
+		RenderFunc:   "mandelbrot",
 		EscapeRadius: 4.0,
 		MemberColor:  "#000000",
 		Power:        2,
@@ -33,17 +35,26 @@ func contexts(p *Parameters) []*Context {
 	return MakeContexts(img, n_cpu, p)
 }
 
+func TestVersion(t *testing.T) {
+	pattern := regexp.MustCompile(`\d+\.\d+\.\d+`)
+	if !pattern.MatchString(Version) {
+		t.Errorf("Expected %#v to match \"%s\".", Version, pattern.String())
+	}
+}
+
 func TestRenderImage(t *testing.T) {
+	c := make(chan bool)
 	p := parameters()
 	contexts := contexts(&p)
-	Render(n_cpu, contexts, Mandelbrot)
+	Render(n_cpu, contexts, c)
 }
 
 func TestMandelbrot(t *testing.T) {
+	c := make(chan bool)
 	p := parameters()
 	contexts := contexts(&p)
 
-	rc := Mandelbrot(contexts[0])
+	rc := Mandelbrot(contexts[0], c)
 	if rc != 0 {
 		t.Errorf("Mandelbrot didn't return 0: %d", rc)
 	}
@@ -66,20 +77,22 @@ func TestEscape(t *testing.T) {
 }
 
 func BenchmarkRenderImage(b *testing.B) {
+	c := make(chan bool)
 	p := parameters()
 	contexts := contexts(&p)
 
 	for i := 0; i < b.N; i++ {
-		Render(n_cpu, contexts, Mandelbrot)
+		Render(n_cpu, contexts, c)
 	}
 }
 
 func BenchmarkMandelbrot(b *testing.B) {
+	c := make(chan bool)
 	p := parameters()
 	contexts := contexts(&p)
 
 	for i := 0; i < b.N; i++ {
-		Mandelbrot(contexts[0])
+		Mandelbrot(contexts[0], c)
 	}
 }
 
