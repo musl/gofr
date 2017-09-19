@@ -180,7 +180,7 @@ Gofr.FractalBrowser = Ractive.extend({
         this.update_view();
       },
       go_back: function() {
-        this.set('view', this.get('view_history').pop());
+        this.set('view', this.get('view_history').shift());
         this.update_view(true);
       },
       go_to_bookmark: function(event) {
@@ -316,8 +316,10 @@ Gofr.FractalBrowser = Ractive.extend({
     self = this;
     image = $('#image');
 
+    // The view is always a square who's width is determined by the
+    // parent element. TODO hook up resizing?
     this.set('view.w', parseInt(image.width()));
-    this.set('view.h', parseInt(image.height()));
+    this.set('view.h', parseInt(image.width()));
 
     i = new Image();
     i.onload = function() {
