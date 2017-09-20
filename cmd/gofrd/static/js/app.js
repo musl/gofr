@@ -6,7 +6,7 @@ Gofr.storage = localStorage;
 
 Gofr.helpers = Ractive.defaults.data;
 Gofr.helpers.complex = function(r, i) {
-  return r + (i < 0 ? "" : "+") + i + "i";
+  return r + (i < 0 ? "" : " +") + i + "i";
 };
 
 Gofr.uuid = function() {
@@ -66,8 +66,6 @@ Gofr.FractalBrowser = Ractive.extend({
       width: 960,
       height: 960,
       view: {},
-      view_history: [],
-      view_history_max: 3,
       default_view: {
         editable: false,
         i: 300,
@@ -123,16 +121,19 @@ Gofr.FractalBrowser = Ractive.extend({
 
     this.ring = $(this.find('div#ring'));
     window.ring = this.ring;
-
-    this.update_view();
   },
   oncomplete: function() {
-    this.observe('view', function() {
-      Gofr.storage.setItem('gofr.browser.view', this.json('view'));
-    });
+    this.observe('view.*', function(newValue, oldValue, keypath) {
 
-    this.observe('view_history', function() {
-      Gofr.storage.setItem('gofr.browser.view_history', this.json('view_history'));
+      // Filter out text fields so that we don't kick off extra render
+      // jobs.
+      // 
+      // TODO: Impose a delayed queue to coalesce edits or show a ui
+      // element to indicate that the user needs to call for a refresh
+      if(keypath.match(/\.(i|e|s|p)$/)) return;
+
+      Gofr.storage.setItem('gofr.browser.view', this.json('view'));
+      this.update_view();
     });
 
     this.observe('bookmarks', function() {
@@ -146,42 +147,30 @@ Gofr.FractalBrowser = Ractive.extend({
     this.on({
       move_up: function() {
         this.translate_view(0.0, -0.0625 * (this.get('view.imax') - this.get('view.imin')));
-        this.update_view();
       },
       move_down: function() {
         this.translate_view(0.0, 0.0625 * (this.get('view.imax') - this.get('view.imin')));
-        this.update_view();
       },
       move_left: function() {
         this.translate_view(-0.0625 * (this.get('view.rmax') - this.get('view.rmin')), 0.0);
-        this.update_view();
       },
       move_right: function() {
         this.translate_view(0.0625 * (this.get('view.rmax') - this.get('view.rmin')), 0.0);
-        this.update_view();
       },
       zoom_in: function() {
         this.scale_view(0.9);
-        this.update_view();
       },
       zoom_in_4x: function() {
         this.scale_view(0.6);
-        this.update_view();
       },
       zoom_out: function() {
         this.scale_view(1.1);
-        this.update_view();
       },
       zoom_out_4x: function() {
         this.scale_view(1.4);
-        this.update_view();
       },	
       update_view: function() {
         this.update_view();
-      },
-      go_back: function() {
-        this.set('view', this.get('view_history').shift());
-        this.update_view(true);
       },
       go_to_bookmark: function(event) {
         var bookmark, name;
@@ -189,12 +178,11 @@ Gofr.FractalBrowser = Ractive.extend({
         name = 'bookmarks.' + $(event.node).data('bookmark');
         if(!name in this.get('bookmarks')) { return; }
         this.copy_view(name, 'view');
-        this.update_view();
       },
       add_bookmark: function(event) {
         var name;
 
-        // TODO FIX THIS window.prompt 
+        // TODO FIX THIS window.prompt , turn it into a modal dialog.
         name = window.prompt('Enter a name:');
 
         if(name) {
@@ -230,8 +218,11 @@ Gofr.FractalBrowser = Ractive.extend({
       },
       'editor.saved': function(key, text) {
         this.set(key, JSON.parse(text));
-        this.update_view();
       },
+      /*
+       * TODO: Implement a control with handles and a cancel button so
+       * that you can fine-tune mouse selection.
+       */
       mouse: function(ractive_event) {
         var self;
         var canvas, ctx, event, x0, x1, y0, y1;
@@ -286,7 +277,6 @@ Gofr.FractalBrowser = Ractive.extend({
             v.imax = i + di * y1;
             self.update('view');
 
-            self.update_view();
             return;
           }
 
@@ -310,16 +300,14 @@ Gofr.FractalBrowser = Ractive.extend({
   view_url: function(name) {
     return "/png?" + $.param(this.get('view')) + '&render_id=' + this.get('render_id');
   },
-  update_view: function(dont_update_history) {
+  update_view: function() {
     var image, self;
 
     self = this;
     image = $('#image');
 
-    // The view is always a square who's width is determined by the
-    // parent element. TODO hook up resizing?
     this.set('view.w', parseInt(image.width()));
-    this.set('view.h', parseInt(image.width()));
+    this.set('view.h', parseInt(image.height()));
 
     i = new Image();
     i.onload = function() {
@@ -330,17 +318,6 @@ Gofr.FractalBrowser = Ractive.extend({
     };
     this.ring.show();
     i.src = this.view_url();
-
-    if(dont_update_history) return;
-    this.update_history();
-  },
-  update_history: function () {
-    vh = this.get('view_history');
-
-    vh.unshift(JSON.parse(this.json('view')));
-    while(vh.length > this.get('view_history_max')) {
-      vh.pop();
-    }
   },
   translate_view: function(r, i) {
     var view;

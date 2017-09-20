@@ -47,8 +47,10 @@
     <script id='browser-tmpl' type='text/ractive'>
       <editor mode="json" theme="github" />
       <div class="pure-g">
-        <div class="pure-u-1-4 nav">
+        <div class="pure-u-1">
           <h1>gofr</h1>
+        </div>
+        <div class="pure-u-1-4 nav">
           <form class="pure-form pure-form-stacked">
             <label><i class="fa fa-plane"></i>&nbsp;move</label>
             <button class="pure-button" on-click="move_up"><i class="fa fa-chevron-up"></i></button>
@@ -95,7 +97,6 @@
               {{complex(view.rmax, view.imax)}}
             </p>
             <p>
-              <a href="#" on-click="go_back"><i class="fa fa-arrow-left"></i> back</a><br>
               <a href="#" on-click="update_view"><i class="fa fa-refresh"></i> fit &amp update</a><br>
               <a href="#" on-click="edit_view"><i class="fa fa-edit"></i> edit view</a><br>
               <a href="{{view_url()}}" target="_blank"><i class="fa fa-link"></i> permalink</a><br>
