@@ -3,7 +3,8 @@ import Ractive from "ractive";
 import Gofr from "./Gofr";
 import Editor from "./Editor";
 
-import template from "./Browser.html";
+import template from "./Editor.html";
+import "./Editor.css"
 
 export default Ractive.extend({
   template: template,
