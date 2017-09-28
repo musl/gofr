@@ -216,7 +216,7 @@ func main() {
 	log.Printf("gofrd v%s", Version)
 	log.Printf("libgofrd v%s", gofr.Version)
 
-	static_dir := "./static"
+	static_dir := "./build"
 	if value = os.Getenv("GOFR_STATIC_DIR"); value != "" {
 		static_dir = value
 	}

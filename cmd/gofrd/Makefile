@@ -6,6 +6,10 @@ all: clean run
 
 clean:
 	rm -f $(BIN)
+	rm -fr build
+
+frontend:
+	webpack
 
 $(BIN): 
 	go build .
