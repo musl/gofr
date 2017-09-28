@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -80,6 +81,31 @@ func wrapHandlerFunc(h http.HandlerFunc) http.Handler {
 func finish(w http.ResponseWriter, status int, message string) {
 	w.WriteHeader(status)
 	io.WriteString(w, message)
+}
+
+func make_spa_route(docroot, index string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		req_path := filepath.Clean(r.URL.Path)
+		req_path = path.Join(docroot, req_path)
+
+		_, err := os.Stat(req_path)
+		if r.URL.Path == "/" || err != nil {
+			req_path = path.Join(docroot, index)
+		}
+
+		f, err := os.Open(req_path)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "500: Unable to open file: %s", req_path)
+			return
+		}
+
+		// Caching?
+		fmt.Printf("Sending: %s", req_path)
+		w.WriteHeader(200)
+		io.Copy(w, f)
+		return
+	}
 }
 
 func route_png(w http.ResponseWriter, r *http.Request) {
@@ -232,7 +258,8 @@ func main() {
 	}
 	log.Printf("Listening on: %s\n", bind_addr)
 
-	http.Handle("/", wrapHandler(http.FileServer(http.Dir(static_dir))))
+	//http.Handle("/", wrapHandler(http.FileServer(http.Dir(static_dir))))
+	http.Handle("/", wrapHandlerFunc(make_spa_route(static_dir, "index.html")))
 	http.Handle("/png", wrapHandlerFunc(route_png))
 	http.Handle("/status", wrapHandlerFunc(route_status))
 

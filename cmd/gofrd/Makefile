@@ -2,13 +2,19 @@ BIN := $(shell basename $(CURDIR))
 
 .PHONY: all clean run
 
-all: clean run
+all: clean frontend run
 
 clean:
 	rm -f $(BIN)
 	rm -fr build
 
-frontend:
+dist_clean: clean
+	rm -fr node_modules
+
+node_modules:
+	npm i
+
+frontend: node_modules
 	webpack
 
 $(BIN): 
