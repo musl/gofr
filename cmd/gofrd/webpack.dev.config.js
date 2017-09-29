@@ -11,7 +11,7 @@ config.devServer = {
   inline: true,
   contentBase: './build',
   historyApiFallback: true,
-  proxy: { '/api': 'http://127.0.0.1:8000' },
+  proxy: { '/png': 'http://127.0.0.1:8000' },
 };
 
 config.devtool = 'cheap-module-eval-source-map';
