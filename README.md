@@ -39,7 +39,6 @@ Mandelbrot set.
 - JS
     - [http://www.ractivejs.org/](http://www.ractivejs.org/)
     - [https://ace.c9.io/](https://ace.c9.io/)
-    - [https://jquery.ycom/](https://jquery.ycom/)
 - CSS
     - [http://purecss.io/](http://purecss.io/)
     - [http://fontawesome.io/](http://fontawesome.io/)
