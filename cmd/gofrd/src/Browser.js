@@ -16,22 +16,7 @@ export default Ractive.extend({
       width: 960,
       height: 960,
       view: {},
-      default_view: {
-        editable: false,
-        w: 1000,
-        h: 1000,
-        i: 1000,
-        e: 1000.0,
-        m: '#444444',
-        c: 'smooth',
-        r: 'mandelbrot',
-        s: 2.0,
-        p: 2,
-        rmin: -2.1,
-        rmax: 2.1,
-        imin: -2.1,
-        imax: 2.1,
-      },
+      default_bookmarks: {},
       bookmarks: {},
       render_id: '',
     };
@@ -46,14 +31,14 @@ export default Ractive.extend({
       if(view) {
         this.set('view', view);
       } else {
-        this.deep_copy('default_view', 'view');
+        this.deep_copy('default_bookmarks.mandelbrot', 'view');
       }
 
       marks = JSON.parse(Gofr.storage.getItem('gofr.browser.marks'));
       if(marks) {
         this.set('bookmarks', marks);
       } else {
-        this.deep_copy('default_view', 'bookmarks.home');
+        this.deep_copy('default_bookmarks', 'bookmarks');
       }
 
       render_id = JSON.parse(Gofr.storage.getItem('gofr.browser.render_id'));
@@ -180,7 +165,7 @@ export default Ractive.extend({
       x1 = x0;
       y1 = y0;
 
-     handler = function handler(e) {
+      handler = function handler(e) {
         var cancel, clear, ch, cw, dr, di, h, i, r, v, w;
 
         cw = self.canvas.width;

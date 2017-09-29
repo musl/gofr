@@ -16,5 +16,5 @@ export default Ractive.extend({
     Heading,
     Browser,
   },
-  on: {}
+  on: {},
 });
