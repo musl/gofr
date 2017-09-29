@@ -9,7 +9,6 @@
     "start": "webpack -w & node_modules/webpack-dev-server/bin/webpack-dev-server.js --config webpack.dev.config.js"
   },
   "dependencies": {
-    "axios": "^0.16.2",
     "ractive": "^0.9.1",
     "ractive-animatecss": "^0.1.0",
     "ractive-datetime": "^1.0.0",

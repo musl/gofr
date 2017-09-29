@@ -1,4 +1,3 @@
-import Axios from 'axios'
 import Ractive from "ractive"
 import Router from "ractive-route"
 
