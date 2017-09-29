@@ -95,15 +95,17 @@ func make_spa_route(docroot, index string) http.HandlerFunc {
 
 		f, err := os.Open(req_path)
 		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprintf(w, "500: Unable to open file: %s", req_path)
+			finish(w, 500, fmt.Sprintf("Unable to open file: %s", req_path))
 			return
 		}
 
-		// Caching?
-		fmt.Printf("Sending: %s", req_path)
-		w.WriteHeader(200)
-		io.Copy(w, f)
+		i, err := os.Stat(req_path)
+		if err != nil {
+			finish(w, 500, fmt.Sprintf("Unable to stat file: %s", req_path))
+			return
+		}
+
+		http.ServeContent(w, r, req_path, i.ModTime(), f)
 		return
 	}
 }
