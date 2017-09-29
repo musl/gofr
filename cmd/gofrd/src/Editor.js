@@ -38,7 +38,7 @@ export default Ractive.extend({
     dismiss: function() {
       this.dialog.close();
     },
-    edit: function(key, text) {
+    edit: function(context, key, text) {
       this.set('key', key);
       this.set('text', text);
       this.doc.setValue(text);

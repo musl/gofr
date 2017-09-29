@@ -23,18 +23,17 @@ export default Ractive.extend({
         i: 300,
         e: 4.0,
         m: '#444444',
-        c: 'stripe',
+        c: 'smooth',
         r: 'mandelbrot',
         s: 2.0,
         p: 2,
         rmin: -2.1,
-        rmax: 0.6,
-        imin: -1.25,
-        imax: 1.25,
+        rmax: 2.1,
+        imin: -2.1,
+        imax: 2.1,
       },
       bookmarks: {},
       render_id: '',
-      //view_url: this.view_url,
     };
   },
   on: {
@@ -47,17 +46,14 @@ export default Ractive.extend({
       if(view) {
         this.set('view', view);
       } else {
-        this.copy_view('default_view', 'view');
+        this.deep_copy('default_view', 'view');
       }
 
       marks = JSON.parse(Gofr.storage.getItem('gofr.browser.marks'));
       if(marks) {
-        window.marks = marks;
-        Object.keys(marks).filter(function(key, value) {
-          self.set('bookmarks.' + key, value);
-        });
+        this.set('bookmarks', marks);
       } else {
-        this.copy_view('default_view', 'bookmarks.home');
+        this.deep_copy('default_view', 'bookmarks.home');
       }
 
       render_id = JSON.parse(Gofr.storage.getItem('gofr.browser.render_id'));
@@ -81,7 +77,7 @@ export default Ractive.extend({
         if(keypath.match(/\.(i|e|s|p|w|h)$/)) return;
 
         Gofr.storage.setItem('gofr.browser.view', this.json('view'));
-        //this.update_view();
+        this.update_view();
       });
 
       this.observe('bookmarks', function() {
@@ -122,9 +118,9 @@ export default Ractive.extend({
     go_to_bookmark: function(event) {
       var bookmark, name;
 
-      name = 'bookmarks.' + event.node.data('bookmark');
+      name = event.node.dataset.bookmark;
       if(!name in this.get('bookmarks')) { return; }
-      this.copy_view(name, 'view');
+      this.deep_copy('bookmarks.' + name, 'view');
     },
     add_bookmark: function(event) {
       var name;
@@ -133,15 +129,15 @@ export default Ractive.extend({
       name = window.prompt('Enter a name:');
 
       if(name) {
-        this.copy_view('view', 'bookmarks.' + name);
+        this.deep_copy('view', 'bookmarks.' + name);
         this.set('bookmarks.' + name + '.editable', true); 
       }
     },
     update_bookmark: function(event) {
       var name;
 
-      name = event.node.data('bookmark');
-      this.copy_view('view', 'bookmarks.' + name);
+      name = event.node.dataset.bookmark;
+      this.deep_copy('view', 'bookmarks.' + name);
       this.set('bookmarks.' + name + '.editable', true); 
     },
     delete_bookmark: function(event) {
@@ -160,10 +156,10 @@ export default Ractive.extend({
     edit_bookmarks: function() {
       var editor;
 
-      editor = this.findComponent('editor');
+      editor = this.findComponent('Editor');
       editor.fire('edit', 'bookmarks', this.json('bookmarks'));
     },
-    'editor.saved': function(key, text) {
+    'Editor.saved': function(context, key, text) {
       this.set(key, JSON.parse(text));
     },
     /*
@@ -172,23 +168,23 @@ export default Ractive.extend({
      */
     mouse: function(ractive_event) {
       var self;
-      var canvas, ctx, event, x0, x1, y0, y1;
+      var canvas, ctx, event, handler, x0, x1, y0, y1;
 
       self = this;
       event = ractive_event.original;
 
       if(event.button !== 0) return;
 
-      x0 = Math.floor(event.pageX - this.canvas.offset().left);
-      y0 = Math.floor(event.pageY - this.canvas.offset().top);
+      x0 = event.offsetX;
+      y0 = event.offsetY;
       x1 = x0;
       y1 = y0;
 
-      this.canvas.on('mousemove mouseup mouseout', function handler(e) {
+     handler = function handler(e) {
         var cancel, clear, ch, cw, dr, di, h, i, r, v, w;
 
-        cw = self.canvas.width();
-        ch = self.canvas.height();
+        cw = self.canvas.width;
+        ch = self.canvas.height;
 
         clear = function() {
           self.ctx.save();
@@ -197,7 +193,9 @@ export default Ractive.extend({
         };
 
         cancel = function() {
-          self.canvas.off('mousemove mouseup mouseout', handler);
+          self.canvas.onmousemove = null;
+          self.canvas.onmouseup = null;
+          self.canvas.onmouseout = null;
           clear();
         };
 
@@ -227,7 +225,7 @@ export default Ractive.extend({
           return;
         }
 
-        x1 = Math.floor(e.pageX - self.canvas.offset().left);
+        x1 = e.offsetX;
         y1 = y0 + ((x1 - x0) * (ch / cw));
 
         clear();
@@ -237,7 +235,11 @@ export default Ractive.extend({
         self.ctx.strokeRect(x0 - 0.5, y0 - 0.5, x1 - x0, y1 - y0);
         self.ctx.fillStyle = "rgba(0, 220, 255, 0.20)";
         self.ctx.fillRect(x0, y0, x1 - x0 - 1.5, y1 - y0 - 1.5);
-      });
+      };
+
+      this.canvas.onmousemove = handler;
+      this.canvas.onmouseup = handler;
+      this.canvas.onmouseout = handler;
     }
   },
   json: function(key) {
@@ -271,7 +273,9 @@ export default Ractive.extend({
 
     i = new Image();
     i.onload = function() {
-      image.style.background_image = "url(" + self.view_url() + ")";
+      image.style.background = "url(" + self.view_url() + ")";
+      image.style.width = self.get("view.w") + 'px';
+      image.style.height = self.get("view.h") + 'px';
       ring.hidden = true;
     };
     ring.hidden = false;
@@ -306,7 +310,7 @@ export default Ractive.extend({
 
     this.update('view');
   },
-  copy_view: function(src_key, dst_key) {
+  deep_copy: function(src_key, dst_key) {
     this.set(dst_key, JSON.parse(this.json(src_key)));
   },
 });

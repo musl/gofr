@@ -7,7 +7,7 @@ Gofr.storage = localStorage;
 Gofr.helpers = Ractive.defaults.data;
 
 Gofr.helpers.complex = function(r, i) {
-  return r + (i < 0 ? "" : " +") + i + "i";
+  return r + (i < 0 ? "" : "+") + i + "i";
 };
 
 Gofr.uuid = function() {
