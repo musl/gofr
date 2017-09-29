@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"sync"
@@ -84,13 +85,26 @@ func finish(w http.ResponseWriter, status int, message string) {
 }
 
 func make_spa_route(docroot, index string) http.HandlerFunc {
+
+	// Rule: routes must end in '/', files must not. This means that
+	// requests for directories will always be served with the spa index
+	// file.
+	pattern := regexp.MustCompile(`/$`)
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		req_path := filepath.Clean(r.URL.Path)
-		req_path = path.Join(docroot, req_path)
+		var req_path string
+
+		if r.URL.Path == "/" || pattern.MatchString(r.URL.Path) {
+			req_path = path.Join(docroot, index)
+		} else {
+			req_path = filepath.Clean(r.URL.Path)
+			req_path = path.Join(docroot, req_path)
+		}
 
 		_, err := os.Stat(req_path)
-		if r.URL.Path == "/" || err != nil {
-			req_path = path.Join(docroot, index)
+		if err != nil {
+			finish(w, 404, "File Not Found")
+			return
 		}
 
 		f, err := os.Open(req_path)
