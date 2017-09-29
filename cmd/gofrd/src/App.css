@@ -1,0 +1,34 @@
+.l-box {
+  padding: 0 2em;
+}
+
+.heading {
+  color: #fff;
+  background-color: #333;
+  margin-bottom: 1em;
+}
+
+.sidebar {
+}
+
+.sidebar ul {
+}
+
+.sidebar ul > li {
+  list-style: none;
+  margin-bottom: 1em;
+}
+
+.sidebar ul > li.current {
+  list-style: disc;
+}
+
+.sidebar-box {
+  padding-top: 1em;
+  border-right: 2px #ddd dotted;
+  min-height: 256px;
+}
+
+.main-content {
+  padding-top: 1em;
+}

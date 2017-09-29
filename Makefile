@@ -2,7 +2,7 @@ DEPS := github.com/google/uuid
 DEPS += github.com/nfnt/resize
 DEPS += github.com/lucasb-eyer/go-colorful
 
-.PHONY: all test
+.PHONY: all clean clobber test vendor
 
 all: commands test
 
@@ -10,6 +10,9 @@ clean:
 	rm -fr vendor
 	make -C cmd/gofrd clean
 	make -C lib/gofr clean
+	
+clobber: clean
+	make -C cmd/gofrd clobber
 
 vendor:
 	mkdir -p vendor

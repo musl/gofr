@@ -1,11 +1,21 @@
 BIN := $(shell basename $(CURDIR))
 
-.PHONY: all clean run
+.PHONY: all clean clobber run test
 
-all: clean run
+all: clean frontend run
 
 clean:
 	rm -f $(BIN)
+	rm -fr build
+
+clobber: clean
+	rm -fr node_modules
+
+node_modules:
+	npm i
+
+frontend: node_modules
+	webpack
 
 $(BIN): 
 	go build .

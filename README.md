@@ -9,20 +9,21 @@ Mandelbrot set.
 
 ## Play
 
+1. Install global prerequisites:
+
+  1. npm (`brew install npm`)
+  1. webpack (`npm install -g webpack`)
+
 1. Fetch the project: `go get github.com/musl/gofr/...`
 
     If you run into problems, check or set up your go directory and `GOPATH` with the instructions here: [https://golang.org/doc/code.html](https://golang.org/doc/code.html)
 
 1. Run the service:
 
-    `GOFR_STATIC_DIR=$GOPATH/src/github.com/musl/gofr/cmd/gofrd/static $GOPATH/bin/gofrd`
+  1. `cd $GOPATH/src/github.com/musl/gofr`
+  1. `make`
 
 1. Browse to: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-
-## Build & Test
-
-1. `cd $GOPATH/src/github.com/musl/gofr`
-1. `make`
 
 ## Update Vendored Go Dependencies
 

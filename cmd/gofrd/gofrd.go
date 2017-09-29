@@ -11,7 +11,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"sync"
@@ -80,6 +82,46 @@ func wrapHandlerFunc(h http.HandlerFunc) http.Handler {
 func finish(w http.ResponseWriter, status int, message string) {
 	w.WriteHeader(status)
 	io.WriteString(w, message)
+}
+
+func make_spa_route(docroot, index string) http.HandlerFunc {
+
+	// Rule: routes must end in '/', files must not. This means that
+	// requests for directories will always be served with the spa index
+	// file.
+	pattern := regexp.MustCompile(`/$`)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req_path string
+
+		if r.URL.Path == "/" || pattern.MatchString(r.URL.Path) {
+			req_path = path.Join(docroot, index)
+		} else {
+			req_path = filepath.Clean(r.URL.Path)
+			req_path = path.Join(docroot, req_path)
+		}
+
+		_, err := os.Stat(req_path)
+		if err != nil {
+			finish(w, 404, "File Not Found")
+			return
+		}
+
+		f, err := os.Open(req_path)
+		if err != nil {
+			finish(w, 500, fmt.Sprintf("Unable to open file: %s", req_path))
+			return
+		}
+
+		i, err := os.Stat(req_path)
+		if err != nil {
+			finish(w, 500, fmt.Sprintf("Unable to stat file: %s", req_path))
+			return
+		}
+
+		http.ServeContent(w, r, req_path, i.ModTime(), f)
+		return
+	}
 }
 
 func route_png(w http.ResponseWriter, r *http.Request) {
@@ -216,7 +258,7 @@ func main() {
 	log.Printf("gofrd v%s", Version)
 	log.Printf("libgofrd v%s", gofr.Version)
 
-	static_dir := "./static"
+	static_dir := "./build"
 	if value = os.Getenv("GOFR_STATIC_DIR"); value != "" {
 		static_dir = value
 	}
@@ -232,7 +274,8 @@ func main() {
 	}
 	log.Printf("Listening on: %s\n", bind_addr)
 
-	http.Handle("/", wrapHandler(http.FileServer(http.Dir(static_dir))))
+	//http.Handle("/", wrapHandler(http.FileServer(http.Dir(static_dir))))
+	http.Handle("/", wrapHandlerFunc(make_spa_route(static_dir, "index.html")))
 	http.Handle("/png", wrapHandlerFunc(route_png))
 	http.Handle("/status", wrapHandlerFunc(route_status))
 
