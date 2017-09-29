@@ -52,6 +52,6 @@ Mandelbrot set.
     The binary is more or less a [12-factor app](http://12factor.net)
     that accepts configuration via the environment:
 
-    - `GOFR_STATIC_DIR`: The path to the static assets for gofrd.  Default: `./static`
+    - `GOFR_STATIC_DIR`: The path to the static assets for gofrd.  Default: `./build`
     - `GOFR_BIND_ADDR`: The address and port to bind to. Default: `0.0.0.0:8000`
 
