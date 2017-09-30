@@ -36,6 +36,7 @@ Mandelbrot set.
 - Go
     - [https://github.com/nfnt/resize](https://github.com/nfnt/resize)
     - [https://github.com/google/uuid](https://github.com/google/uuid)
+    - [https://github.com/lucasb-eyer/go-colorful](https://github.com/lucasb-eyer/go-colorful)
 - JS
     - [http://www.ractivejs.org/](http://www.ractivejs.org/)
     - [https://ace.c9.io/](https://ace.c9.io/)
