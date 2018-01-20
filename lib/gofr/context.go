@@ -115,7 +115,7 @@ func MakeContexts(im *image.NRGBA64, n int, p *Parameters) (c []*Context) {
 	return
 }
 
-func (self *Context) delta() (dx, dy float64) {
+func (self *Context) Delta() (dx, dy float64) {
 	rw := self.ImageWidth
 	rh := self.ImageHeight
 
@@ -140,7 +140,7 @@ func (self *Context) EachPoint(fn ContextFunc, cancel chan bool) {
 	rmin := self.Image.Bounds().Min
 	rmax := self.Image.Bounds().Max
 	cmin := self.Min
-	dx, dy := self.delta()
+	dx, dy := self.Delta()
 	var z complex128
 
 	for x := rmin.X; x < rmax.X; x++ {

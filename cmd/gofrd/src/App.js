@@ -1,5 +1,4 @@
 import Ractive from "ractive"
-import Router from "ractive-route"
 
 import Heading from "./Heading"
 import Browser from "./Browser"
@@ -11,10 +10,11 @@ import template from "./App.html"
 import "./App.css"
 
 export default Ractive.extend({
-  template: template,
-  components: {
-    Heading,
-    Browser,
-  },
-  on: {},
+	template: template,
+	components: {
+		Heading,
+		Browser,
+	},
+	hello: {},
+	on: {},
 });

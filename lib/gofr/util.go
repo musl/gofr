@@ -8,6 +8,10 @@ import (
 	"runtime"
 )
 
+func Round(x, unit float64) float64 {
+	return float64(int64(x/unit+0.5)) * unit
+}
+
 func PrintByteSize(s uint64) string {
 	key := "BKMGTPEZY"
 	l := int(math.Floor(math.Log(float64(s)) / math.Log(1024)))

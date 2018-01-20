@@ -108,6 +108,7 @@ func make_spa_route(docroot, index string) http.HandlerFunc {
 		}
 
 		f, err := os.Open(req_path)
+		defer f.Close()
 		if err != nil {
 			finish(w, 500, fmt.Sprintf("Unable to open file: %s", req_path))
 			return
@@ -120,7 +121,6 @@ func make_spa_route(docroot, index string) http.HandlerFunc {
 		}
 
 		http.ServeContent(w, r, req_path, i.ModTime(), f)
-		return
 	}
 }
 

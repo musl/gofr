@@ -1,11 +1,13 @@
 BIN := $(shell basename $(CURDIR))
 
-.PHONY: all clean clobber run test
+.PHONY: all clean clean_build clobber run test
 
-all: clean frontend run
+all: clean clean_build frontend run
 
 clean:
 	rm -f $(BIN)
+
+clean_build:
 	rm -fr build
 
 clobber: clean
@@ -25,4 +27,7 @@ test: $(BIN)
 
 run: $(BIN)
 	./$(BIN)
+
+docker: clean frontend
+	GOOS=linux GOARCH=amd64 go build .
 

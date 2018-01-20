@@ -1,0 +1,10 @@
+version: "3.3"
+
+services:
+  gofrd:
+    build: .
+    image: musl/gofrd:v1
+    container_name: gofrd
+    ports:
+      - 8000:8000
+

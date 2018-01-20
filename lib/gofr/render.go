@@ -10,6 +10,10 @@ func RenderFuncFromString(name string) (RenderFunc, error) {
 	switch name {
 	case "mandelbrot":
 		return Mandelbrot, nil
+	case "ebrot":
+		return Ebrot, nil
+	case "experimental":
+		return Experimental, nil
 	default:
 		return nil, fmt.Errorf("Invalid RenderFunc name: %#v", name)
 	}

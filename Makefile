@@ -1,6 +1,7 @@
 DEPS := github.com/google/uuid
 DEPS += github.com/nfnt/resize
 DEPS += github.com/lucasb-eyer/go-colorful
+DEPS += github.com/stretchr/testify
 
 .PHONY: all clean clobber test vendor
 
@@ -25,4 +26,11 @@ commands:
 test:
 	make -C lib/gofr test
 	make -C cmd/gofrd test
+
+daemon:
+	make -C cmd/gofrd clean run
+
+docker:
+	make -C cmd/gofrd docker
+	docker-compose up --build -d
 

@@ -81,6 +81,7 @@ func BenchmarkRenderImage(b *testing.B) {
 	p := parameters()
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Render(n_cpu, contexts, c)
 	}
@@ -91,6 +92,7 @@ func BenchmarkMandelbrot(b *testing.B) {
 	p := parameters()
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Mandelbrot(contexts[0], c)
 	}
@@ -101,6 +103,7 @@ func BenchmarkColorMono(b *testing.B) {
 	p.ColorFunc = "mono"
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ColorMono(contexts[0], complex(0, 0), 0, 0, 0, p.MaxI)
 	}
@@ -111,6 +114,7 @@ func BenchmarkColorMonoStripe(b *testing.B) {
 	p.ColorFunc = "stripe"
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ColorMono(contexts[0], complex(0, 0), 0, 0, 0, p.MaxI)
 	}
@@ -121,6 +125,7 @@ func BenchmarkColorBands(b *testing.B) {
 	p.ColorFunc = "bands"
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ColorMono(contexts[0], complex(0, 0), 0, 0, 0, p.MaxI)
 	}
@@ -131,6 +136,7 @@ func BenchmarkColorSmooth(b *testing.B) {
 	p.ColorFunc = "smooth"
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ColorMono(contexts[0], complex(0, 0), 0, 0, 0, p.MaxI)
 	}
@@ -140,6 +146,7 @@ func BenchmarkEscapeIn(b *testing.B) {
 	p := parameters()
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		z := complex(0.1*rand.Float64(), 0.1*rand.Float64())
 		Escape(contexts[0], z, p.MaxI)
@@ -150,6 +157,7 @@ func BenchmarkEsceapeOut(b *testing.B) {
 	p := parameters()
 	contexts := contexts(&p)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		z := complex(2.0*rand.Float64(), 2.0*rand.Float64())
 		Escape(contexts[0], z, p.MaxI)
