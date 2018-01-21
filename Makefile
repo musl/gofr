@@ -1,6 +1,6 @@
 .PHONY: all clean clobber test
 
-all: vendor commands test
+all: commands test
 
 clean:
 	make -C cmd/gofrd clean
@@ -10,17 +10,17 @@ clobber: clean
 	rm -fr vendor
 	make -C cmd/gofrd clobber
 
-commands:
+commands: vendor
 	make -C cmd/gofrd
 
-daemon:
+daemon: vendor
 	make -C cmd/gofrd clean run
 
-docker:
+docker: vendor
 	make -C cmd/gofrd docker
 	docker-compose up --build -d
 
-test:
+test: vendor
 	make -C lib/gofr test
 	make -C cmd/gofrd test
 
