@@ -13,5 +13,5 @@ install:
   - go get github.com/musl/gofr/...
 
 script: 
-  - make vendor test
+  - make clobber test
 
