@@ -21,15 +21,9 @@ Mandelbrot set.
 1. Build & Run the service:
 
     1. `cd $GOPATH/src/github.com/musl/gofr`
-    1. `make`
+    1. `make run`
 
 1. Browse to: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-
-## Update Vendored Go Dependencies
-
-1. `make clean vendor`
-1. `git add -f vendor`
-1. `git ci -m "Update vendored dependencies"`
 
 ## List of Vendored Libraries
 
