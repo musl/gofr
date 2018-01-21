@@ -1,0 +1,16 @@
+
+[[constraint]]
+  name = "github.com/google/uuid"
+  version = "0.2.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/lucasb-eyer/go-colorful"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/nfnt/resize"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.2.0"
