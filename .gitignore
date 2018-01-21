@@ -1,6 +1,7 @@
 /cmd/gofrd/gofrd
 /cmd/gofrd/build
 /cmd/gofrd/node_modules
+/vendor
 *.test
 *.out
 *.png
