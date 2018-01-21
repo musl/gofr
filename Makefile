@@ -1,20 +1,17 @@
 .PHONY: all clean clobber test
 
-all: commands test
+all: test
 
 clean:
 	make -C cmd/gofrd clean
 	make -C lib/gofr clean
+	rm -fr vendor
 	
 clobber: clean
-	rm -fr vendor
 	make -C cmd/gofrd clobber
 
-commands: vendor
-	make -C cmd/gofrd
-
-daemon: vendor
-	make -C cmd/gofrd clean run
+run: vendor
+	make -C cmd/gofrd run
 
 docker: vendor
 	make -C cmd/gofrd docker

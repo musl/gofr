@@ -2,7 +2,7 @@ BIN := $(shell basename $(CURDIR))
 
 .PHONY: all clean clean_build clobber run test
 
-all: clean clean_build frontend run
+all: test
 
 clean:
 	rm -f $(BIN)
@@ -10,7 +10,7 @@ clean:
 clean_build:
 	rm -fr build
 
-clobber: clean
+clobber: clean clean_build
 	rm -fr node_modules
 
 node_modules:
@@ -25,7 +25,7 @@ $(BIN):
 test: $(BIN)
 	go test -v .
 
-run: $(BIN)
+run: $(BIN) clean_build frontend
 	./$(BIN)
 
 docker: clean frontend
