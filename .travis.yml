@@ -13,5 +13,5 @@ install:
   - go get github.com/musl/gofr/...
 
 script: 
-  - make test
+  - make clean test
 
