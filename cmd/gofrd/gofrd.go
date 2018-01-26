@@ -20,30 +20,35 @@ import (
 	"time"
 )
 
+// Version is a semantic version for the package.
 const Version = "0.2.2"
 
-var render_jobs = make(map[string]RenderJob)
-var render_jobs_mutex = &sync.Mutex{}
+var renderJobs = make(map[string]RenderJob)
+var renderJobsMutex = &sync.Mutex{}
 
+// RenderJob contains all information necessary to complete a Render.
 type RenderJob struct {
 	Parameters gofr.Parameters
 	Cancel     chan bool
 	Threads    int
 }
 
-func (self *RenderJob) Render() (image.Image, error) {
-	img := image.NewNRGBA64(image.Rect(0, 0, self.Parameters.ImageWidth, self.Parameters.ImageHeight))
-	contexts := gofr.MakeContexts(img, self.Threads, &self.Parameters)
+// Render executes a RenderJob's unit of work.
+func (rj *RenderJob) Render() (image.Image, error) {
+	img := image.NewNRGBA64(image.Rect(0, 0, rj.Parameters.ImageWidth, rj.Parameters.ImageHeight))
+	contexts := gofr.MakeContexts(img, rj.Threads, &rj.Parameters)
 
-	err := gofr.Render(self.Threads, contexts, self.Cancel)
+	err := gofr.Render(rj.Threads, contexts, rj.Cancel)
 	if err != nil {
 		return nil, err
 	}
 
-	image := resize.Resize(self.Parameters.Width, self.Parameters.Height, image.Image(img), resize.Lanczos3)
+	image := resize.Resize(rj.Parameters.Width, rj.Parameters.Height, image.Image(img), resize.Lanczos3)
 	return image, nil
 }
 
+// LogResponseWriter logs how long a response took and what it's
+// resulting status code was.
 type LogResponseWriter struct {
 	http.ResponseWriter
 	Status int
@@ -51,18 +56,23 @@ type LogResponseWriter struct {
 	End    time.Time
 }
 
+// NewLogResponseWriter returns a new LogResponseWriter that wraps a
+// given http.ResponseWriter.
 func NewLogResponseWriter(w http.ResponseWriter) *LogResponseWriter {
 	return &LogResponseWriter{w, 0, time.Now(), time.Now()}
 }
 
-func (self *LogResponseWriter) WriteHeader(code int) {
-	self.Status = code
-	self.ResponseWriter.WriteHeader(code)
+// WriteHeader implements http.ResponseWriter
+func (lrw *LogResponseWriter) WriteHeader(code int) {
+	lrw.Status = code
+	lrw.ResponseWriter.WriteHeader(code)
 }
 
-func (self LogResponseWriter) Log(message string) {
-	self.End = time.Now()
-	log.Printf("%s %v\n", message, self.End.Sub(self.Start))
+// Log writes out the time difference between being initialized and when
+// it is called.
+func (lrw LogResponseWriter) Log(message string) {
+	lrw.End = time.Now()
+	log.Printf("%s %v\n", message, lrw.End.Sub(lrw.Start))
 }
 
 func wrapHandler(h http.Handler) http.Handler {
@@ -84,7 +94,7 @@ func finish(w http.ResponseWriter, status int, message string) {
 	io.WriteString(w, message)
 }
 
-func make_spa_route(docroot, index string) http.HandlerFunc {
+func makeSPARoute(docroot, index string) http.HandlerFunc {
 
 	// Rule: routes must end in '/', files must not. This means that
 	// requests for directories will always be served with the spa index
@@ -92,39 +102,39 @@ func make_spa_route(docroot, index string) http.HandlerFunc {
 	pattern := regexp.MustCompile(`/$`)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req_path string
+		var reqPath string
 
 		if r.URL.Path == "/" || pattern.MatchString(r.URL.Path) {
-			req_path = path.Join(docroot, index)
+			reqPath = path.Join(docroot, index)
 		} else {
-			req_path = filepath.Clean(r.URL.Path)
-			req_path = path.Join(docroot, req_path)
+			reqPath = filepath.Clean(r.URL.Path)
+			reqPath = path.Join(docroot, reqPath)
 		}
 
-		_, err := os.Stat(req_path)
+		_, err := os.Stat(reqPath)
 		if err != nil {
 			finish(w, 404, "File Not Found")
 			return
 		}
 
-		f, err := os.Open(req_path)
+		f, err := os.Open(reqPath)
 		defer f.Close()
 		if err != nil {
-			finish(w, 500, fmt.Sprintf("Unable to open file: %s", req_path))
+			finish(w, 500, fmt.Sprintf("Unable to open file: %s", reqPath))
 			return
 		}
 
-		i, err := os.Stat(req_path)
+		i, err := os.Stat(reqPath)
 		if err != nil {
-			finish(w, 500, fmt.Sprintf("Unable to stat file: %s", req_path))
+			finish(w, 500, fmt.Sprintf("Unable to stat file: %s", reqPath))
 			return
 		}
 
-		http.ServeContent(w, r, req_path, i.ModTime(), f)
+		http.ServeContent(w, r, reqPath, i.ModTime(), f)
 	}
 }
 
-func route_png(w http.ResponseWriter, r *http.Request) {
+func routePNG(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New()
 
 	// TODO either check a table for currently rendering IDs and return
@@ -215,25 +225,25 @@ func route_png(w http.ResponseWriter, r *http.Request) {
 		Cancel:  make(chan bool),
 	}
 
-	render_id := q.Get("render_id")
-	if render_id == "" {
-		finish(w, http.StatusUnprocessableEntity, "Missing render_id")
+	renderID := q.Get("render-id")
+	if renderID == "" {
+		finish(w, http.StatusUnprocessableEntity, "Missing render-id")
 		return
 	}
 
 	defer func() {
-		render_jobs_mutex.Lock()
-		delete(render_jobs, render_id)
-		render_jobs_mutex.Unlock()
+		renderJobsMutex.Lock()
+		delete(renderJobs, renderID)
+		renderJobsMutex.Unlock()
 	}()
 
-	render_jobs_mutex.Lock()
-	if _, exists := render_jobs[render_id]; exists {
-		close(render_jobs[render_id].Cancel)
-		delete(render_jobs, render_id)
+	renderJobsMutex.Lock()
+	if _, exists := renderJobs[renderID]; exists {
+		close(renderJobs[renderID].Cancel)
+		delete(renderJobs, renderID)
 	}
-	render_jobs[render_id] = j
-	render_jobs_mutex.Unlock()
+	renderJobs[renderID] = j
+	renderJobsMutex.Unlock()
 
 	image, err := j.Render()
 	if err != nil {
@@ -247,7 +257,7 @@ func route_png(w http.ResponseWriter, r *http.Request) {
 	png.Encode(w, image)
 }
 
-func route_status(w http.ResponseWriter, r *http.Request) {
+func routeStatus(w http.ResponseWriter, r *http.Request) {
 	finish(w, http.StatusOK, "OK")
 }
 
@@ -258,27 +268,27 @@ func main() {
 	log.Printf("gofrd v%s", Version)
 	log.Printf("libgofrd v%s", gofr.Version)
 
-	static_dir := "./build"
+	staticDir := "./build"
 	if value = os.Getenv("GOFR_STATIC_DIR"); value != "" {
-		static_dir = value
+		staticDir = value
 	}
-	static_dir, err := filepath.Abs(static_dir)
+	staticDir, err := filepath.Abs(staticDir)
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Serving from: %s\n", static_dir)
+	log.Printf("Serving from: %s\n", staticDir)
 
-	bind_addr := "0.0.0.0:8000"
+	bindAddr := "0.0.0.0:8000"
 	if value = os.Getenv("GOFR_BIND_ADDR"); value != "" {
-		bind_addr = value
+		bindAddr = value
 	}
-	log.Printf("Listening on: %s\n", bind_addr)
+	log.Printf("Listening on: %s\n", bindAddr)
 
-	//http.Handle("/", wrapHandler(http.FileServer(http.Dir(static_dir))))
-	http.Handle("/", wrapHandlerFunc(make_spa_route(static_dir, "index.html")))
-	http.Handle("/png", wrapHandlerFunc(route_png))
-	http.Handle("/status", wrapHandlerFunc(route_status))
+	//http.Handle("/", wrapHandler(http.FileServer(http.Dir(staticDir))))
+	http.Handle("/", wrapHandlerFunc(makeSPARoute(staticDir, "index.html")))
+	http.Handle("/png", wrapHandlerFunc(routePNG))
+	http.Handle("/status", wrapHandlerFunc(routeStatus))
 
 	/* Run the thing. */
-	log.Fatal(http.ListenAndServe(bind_addr, nil))
+	log.Fatal(http.ListenAndServe(bindAddr, nil))
 }
