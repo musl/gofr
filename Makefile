@@ -13,21 +13,26 @@ clean:
 	rm -fr vendor
 
 tools:
-	for t in $(TOOLS); do go get $$t; done
+	for t in $(TOOLS) ; do go get $$t ; done
 
 vendor: tools
-	dep ensure
+	if [ ! -d vendor ] ; then dep ensure ; fi
 
 cmd: vendor
-	for d in $(CMDS) ; do make -C $$d $$d; done
+	for d in $(CMDS) ; do make -C $$d $$d ; done
 
-docker: vendor
-	make -C cmd/gofrd docker
+docker: vendor docker_clean
+	make -C cmd/gofrd clean docker
 	docker-compose up --build -d
+	make -C cmd/gofrd clean
+	docker logs -f `docker ps -qf "name=gofrd"`
+
+docker_clean:
+	docker ps -qf "name=gofrd" | xargs docker stop | xargs docker rm
 
 test: vendor
-	for d in $(LIBS) $(CMDS); do make -C $$d test ; done
+	for d in $(LIBS) $(CMDS) ; do make -C $$d test ; done
 
 run: vendor
-	make -C cmd/gofrd run
+	make -C cmd/gofrd clean run
 
