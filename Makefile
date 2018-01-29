@@ -1,26 +1,33 @@
-.PHONY: all clean clobber test
+BIN   := $(shell basename $(CURDIR))
+LIBS  := $(shell find lib -type d -mindepth 1 -maxdepth 1)
+CMDS  := $(shell find cmd -type d -mindepth 1 -maxdepth 1)
+
+TOOLS := github.com/golang/dep/cmd/dep
+
+.PHONY: all clean cmd docker run test tools
 
 all: test
 
 clean:
-	make -C cmd/gofrd clean
-	make -C lib/gofr clean
+	for d in $(CMDS) $(LIBS) ; do make -C $$d clean ; done
 	rm -fr vendor
-	
-clobber: clean
-	make -C cmd/gofrd clobber
 
-run: vendor
-	make -C cmd/gofrd run
+tools:
+	for t in $(TOOLS); do go get $$t; done
+
+vendor: tools
+	dep ensure
+
+cmd: vendor
+	for d in $(CMDS) ; do make -C $$d $$d; done
 
 docker: vendor
 	make -C cmd/gofrd docker
 	docker-compose up --build -d
 
 test: vendor
-	make -C lib/gofr test
-	make -C cmd/gofrd test
+	for d in $(LIBS) $(CMDS); do make -C $$d test ; done
 
-vendor:
-	dep ensure
+run: vendor
+	make -C cmd/gofrd run
 
