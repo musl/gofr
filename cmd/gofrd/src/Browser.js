@@ -43,9 +43,9 @@ export default Ractive.extend({
 
       render_id = JSON.parse(Gofr.storage.getItem('gofr.browser.render_id'));
       if(render_id) {
-        this.set('render_id', render_id);
+        this.set('render-id', render_id);
       } else {
-        this.set('render_id', Gofr.uuid());
+        this.set('render-id', Gofr.uuid());
       }
     },
     complete: function() {
