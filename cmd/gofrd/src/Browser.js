@@ -41,7 +41,7 @@ export default Ractive.extend({
         this.deep_copy('default_bookmarks', 'bookmarks');
       }
 
-      render_id = JSON.parse(Gofr.storage.getItem('gofr.browser.render_id'));
+      render_id = JSON.parse(Gofr.storage.getItem('gofr.browser.render-id'));
       if(render_id) {
         this.set('render_id', render_id);
       } else {
@@ -70,7 +70,7 @@ export default Ractive.extend({
       });
 
       this.observe('render_id', function() {
-        Gofr.storage.setItem('gofr.browser.render_id', this.json('render_id'));
+        Gofr.storage.setItem('gofr.browser.render-id', this.json('render_id'));
       });
     },
     move_up: function() {
@@ -231,7 +231,7 @@ export default Ractive.extend({
     return JSON.stringify(this.get(key), null, 2);
   },
   view_url: function(name) {
-    //return "/png?" + $.param(this.get('view')) + '&render_id=' + this.get('render_id');
+    //return "/png?" + $.param(this.get('view')) + '&render-id=' + this.get('render-id');
     const url = "/png?" +
       "i=" +     encodeURIComponent(this.get("view.i")) +
       "&w=" +    encodeURIComponent(this.get("view.w")) +
@@ -246,7 +246,7 @@ export default Ractive.extend({
       "&rmax=" + encodeURIComponent(this.get("view.rmax")) +
       "&imin=" + encodeURIComponent(this.get("view.imin")) +
       "&imax=" + encodeURIComponent(this.get("view.imax")) +
-      "&render_id=" + this.get('render_id');
+      "&render-id=" + this.get('render-id');
     return url;
   },
   update_view: function() {
