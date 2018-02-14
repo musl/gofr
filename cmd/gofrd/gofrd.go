@@ -2,9 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/musl/gofr/lib/gofr"
-	"github.com/nfnt/resize"
 	"image"
 	"image/png"
 	"io"
@@ -18,6 +15,10 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/musl/gofr/lib/gofr"
+	"github.com/nfnt/resize"
 )
 
 // Version is a semantic version for the package.

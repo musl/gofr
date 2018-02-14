@@ -1,23 +1,24 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func testHandlerFunc(handler http.HandlerFunc, method, target string, bodyReader io.Reader) (response *http.Response, body []byte, err error) {
-	r := httptest.NewRequest(method, target, bodyReader)
+func testHandlerFunc(h http.HandlerFunc, method, target string, reader io.Reader) (*http.Response, []byte, error) {
+	r := httptest.NewRequest(method, target, reader)
 	w := httptest.NewRecorder()
 
 	handler(w, r)
-	response = w.Result()
-	body, err = ioutil.ReadAll(response.Body)
+	response := w.Result()
+	body, err := ioutil.ReadAll(response.Body)
 
-	return
+	return response, body, err
 }
 
 func TestVersion(t *testing.T) {
