@@ -16,6 +16,6 @@ bench: lib
 	go test -bench -v -memprofile mem.out -cpuprofile cpu.out .
 
 graphs: bench
-	go tool pprof --png libgofr.test cpu.out > cpu_graph.png
-	go tool pprof --png libgofr.test mem.out > mem_graph.png
+	go tool pprof --png gofr.test cpu.out > cpu_graph.png
+	go tool pprof --png gofr.test mem.out > mem_graph.png
 
