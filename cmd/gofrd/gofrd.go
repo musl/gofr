@@ -10,7 +10,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strconv"
 	"sync"
@@ -91,47 +90,21 @@ func wrapHandlerFunc(h http.HandlerFunc) http.Handler {
 }
 
 func finish(w http.ResponseWriter, status int, message string) {
+	l, err := io.WriteString(w, message)
+	if err != nil || l != len(message) {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(status)
-	io.WriteString(w, message)
 }
 
-func makeSPARoute(docroot, index string) http.HandlerFunc {
-
-	// Rule: routes must end in '/', files must not. This means that
-	// requests for directories will always be served with the spa index
-	// file.
-	pattern := regexp.MustCompile(`/$`)
-
+func makeSPARoute(docroot string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var reqPath string
+		reqPath := filepath.Clean(r.URL.Path)
+		reqPath = path.Join(docroot, reqPath)
 
-		if r.URL.Path == "/" || pattern.MatchString(r.URL.Path) {
-			reqPath = path.Join(docroot, index)
-		} else {
-			reqPath = filepath.Clean(r.URL.Path)
-			reqPath = path.Join(docroot, reqPath)
-		}
-
-		_, err := os.Stat(reqPath)
-		if err != nil {
-			finish(w, 404, "File Not Found")
-			return
-		}
-
-		f, err := os.Open(reqPath)
-		defer f.Close()
-		if err != nil {
-			finish(w, 500, fmt.Sprintf("Unable to open file: %s", reqPath))
-			return
-		}
-
-		i, err := os.Stat(reqPath)
-		if err != nil {
-			finish(w, 500, fmt.Sprintf("Unable to stat file: %s", reqPath))
-			return
-		}
-
-		http.ServeContent(w, r, reqPath, i.ModTime(), f)
+		http.ServeFile(w, r, reqPath)
 	}
 }
 
@@ -252,10 +225,15 @@ func routePNG(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = png.Encode(w, image)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("X-Render-Job-ID", id.String())
 	w.WriteHeader(http.StatusOK)
-	png.Encode(w, image)
 }
 
 func routeStatus(w http.ResponseWriter, r *http.Request) {
@@ -285,8 +263,7 @@ func main() {
 	}
 	log.Printf("Listening on: %s\n", bindAddr)
 
-	//http.Handle("/", wrapHandler(http.FileServer(http.Dir(staticDir))))
-	http.Handle("/", wrapHandlerFunc(makeSPARoute(staticDir, "index.html")))
+	http.Handle("/", wrapHandlerFunc(makeSPARoute(staticDir)))
 	http.Handle("/png", wrapHandlerFunc(routePNG))
 	http.Handle("/status", wrapHandlerFunc(routeStatus))
 
