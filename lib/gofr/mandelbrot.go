@@ -1,20 +1,18 @@
 package gofr
 
-import (
-	"math"
-)
+import "math"
 
 func Mandelbrot(c *Context, cancel chan bool) int {
-	max_i := c.MaxI
+	maxI := c.MaxI
 	fn := func(x, y int, z complex128) {
-		i, zn := Escape(c, z, max_i)
-		c.ColorFunc(c, zn, x, y, i, max_i)
+		i, zn := Escape(c, z, maxI)
+		c.ColorFunc(c, zn, x, y, i, maxI)
 	}
 	c.EachPoint(fn, cancel)
 	return 0
 }
 
-func Escape(c *Context, z complex128, max_i int) (int, complex128) {
+func Escape(c *Context, z complex128, maxI int) (int, complex128) {
 	i := 0
 	z0 := z
 	zn := complex(0, 0)
@@ -37,12 +35,12 @@ func Escape(c *Context, z complex128, max_i int) (int, complex128) {
 		z += z0
 
 		if zn == z {
-			return max_i, z
+			return maxI, z
 		}
 		zn = z
 
 		d := math.Sqrt(real(z)*real(z) + imag(z)*imag(z))
-		if d >= c.EscapeRadius || i == max_i {
+		if d >= c.EscapeRadius || i == maxI {
 			return i, z
 		}
 

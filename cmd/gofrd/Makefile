@@ -19,14 +19,17 @@ node_modules:
 frontend: node_modules
 	webpack
 
+dev: clean frontend
+	npm start
+
 $(BIN): 
 	go build .
 
 test: $(BIN)
 	go test -v .
 
-run: $(BIN) clean_build frontend
-	./$(BIN)
+run: $(BIN)
+	$(CURDIR)/$(BIN)
 
 docker: clean frontend
 	GOOS=linux GOARCH=amd64 go build .

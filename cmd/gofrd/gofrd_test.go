@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testHandlerFunc(handler http.HandlerFunc, method, target string, bodyReader io.Reader) (response *http.Response, body []byte, err error) {
@@ -28,7 +29,7 @@ func TestRouteStatus(t *testing.T) {
 	response, body, err := testHandlerFunc(routeStatus, "GET", "http:///status", nil)
 
 	assert.NoError(t, err)
-	assert.Equal(t, response.StatusCode, http.StatusOK)
+	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, "OK", string(body))
 }
 
@@ -37,14 +38,6 @@ func TestRoutePNGQuery(t *testing.T) {
 	response, body, err := testHandlerFunc(routePNG, "GET", target, nil)
 
 	assert.NoError(t, err)
-	assert.Equal(t, response.StatusCode, http.StatusOK)
+	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, []byte{0x89, 0x50, 0x4e, 0x47}, body[0:4])
-}
-
-func TestRoutePNGNoQuery(t *testing.T) {
-	response, body, err := testHandlerFunc(routePNG, "GET", "http:///status", nil)
-
-	assert.NoError(t, err)
-	assert.Equal(t, response.StatusCode, http.StatusUnprocessableEntity)
-	assert.Regexp(t, `(?i)invalid`, string(body))
 }

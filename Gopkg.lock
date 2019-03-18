@@ -2,44 +2,61 @@
 
 
 [[projects]]
+  digest = "1:56c130d885a4aacae1dd9c7b71cfe39912c7ebc1ff7d2b46083c8812996dc43b"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = ""
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:c1d7e883c50a26ea34019320d8ae40fad86c9e5d56e63a1ba2cb618cef43e986"
   name = "github.com/google/uuid"
   packages = ["."]
+  pruneopts = ""
   revision = "064e2069ce9c359c118179501254f67d7d37ba24"
   version = "0.2"
 
 [[projects]]
   branch = "master"
+  digest = "1:04d51db1d12a604203af8469c6d2f6d7473a78b88cf2cf37bd2cd3dcf74d03bd"
   name = "github.com/lucasb-eyer/go-colorful"
   packages = ["."]
+  pruneopts = ""
   revision = "231272389856c976b7500c4fffcc52ddf06ff4eb"
 
 [[projects]]
   branch = "master"
+  digest = "1:74688aecdaaede7d4ea1ead4569dc5f9f8b169b3b9698470f8d107f347a7a2cd"
   name = "github.com/nfnt/resize"
   packages = ["."]
+  pruneopts = ""
   revision = "891127d8d1b52734debe1b3c3d7e747502b6c366"
 
 [[projects]]
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = ""
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:2d0dc026c4aef5e2f3a0e06a4dabe268b840d8f63190cf6894e02134a03f52c5"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
+  pruneopts = ""
   revision = "b91bfb9ebec76498946beb6af7c0230c7cc7ba6c"
   version = "v1.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c7760bc1797f962a303ed92e22275d585052bec02f832fa769e9faa898c82654"
+  input-imports = [
+    "github.com/google/uuid",
+    "github.com/lucasb-eyer/go-colorful",
+    "github.com/nfnt/resize",
+    "github.com/stretchr/testify/assert",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

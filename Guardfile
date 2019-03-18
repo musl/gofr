@@ -1,13 +1,9 @@
-# vim: set ft=ruby ts=2 sw=2:
-
-options = {
-  :name => 'gofr',
-  :command => 'make daemon',
-  :env => {},
-}
-
+clearing :off
 interactor :off
 
-guard( :process, options ) do
-  watch( /.*\.(go)$/ )
+guard(:process, name: 'gofrd', command: 'make -C cmd/gofrd clean run') do
+  watch(/.*\.go$/)
 end
+
+guard(:process, name: 'node', command: 'make -C cmd/gofrd dev')
+
