@@ -10,17 +10,13 @@ clean:
 clobber: clean
 	make -C cmd/gofrd clobber
 
-run: vendor
+run:
 	make -C cmd/gofrd run
 
-docker: vendor
+docker:
 	make -C cmd/gofrd docker
 	docker-compose up --build -d
 
-test: vendor
+test:
 	make -C lib/gofr test
 	make -C cmd/gofrd test
-
-vendor:
-	dep ensure
-
