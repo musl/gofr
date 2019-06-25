@@ -2,11 +2,12 @@ package gofr
 
 import (
 	"fmt"
-	"github.com/lucasb-eyer/go-colorful"
 	"image/color"
 	"math"
 	"math/cmplx"
 	"strconv"
+
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 var (
@@ -46,6 +47,8 @@ func ColorFuncFromString(name string) (ColorFunc, error) {
 		return ColorSmooth, nil
 	case "bands":
 		return ColorBands, nil
+	case "gray":
+		return ColorGray, nil
 	case "mono":
 		return ColorMono, nil
 	case "stripe":
@@ -125,6 +128,24 @@ func ColorBands(c *Context, z complex128, x, y, i, max_i int) {
 		centeredUint16(math.Sin(math.Pi + t)),
 		centeredUint16(math.Sin(math.Pi + 0.25*math.Pi + t)),
 		centeredUint16(math.Cos(math.Pi + t)),
+		0xffff,
+	}
+
+	c.Image.SetNRGBA64(x, y, k)
+}
+
+func ColorGray(c *Context, z complex128, x, y, i, max_i int) {
+	if i == max_i {
+		c.Image.SetNRGBA64(x, y, c.MemberColor)
+		return
+	}
+
+	t := math.Log10(float64(i) / float64(max_i))
+
+	k := color.NRGBA64{
+		centeredUint16(t),
+		centeredUint16(t),
+		centeredUint16(t),
 		0xffff,
 	}
 
