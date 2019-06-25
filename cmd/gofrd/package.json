@@ -22,7 +22,7 @@
     "babel-minify-webpack-plugin": "^0.2.0",
     "babel-preset-env": "^1.7.0",
     "copy-webpack-plugin": "^4.6.0",
-    "css-loader": "^0.28.11",
+    "css-loader": "^2.1.1",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-html": "^3.0.0",
@@ -30,7 +30,8 @@
     "ractive-transitions-fade": "^0.3.1",
     "ractive-transitions-slide": "^0.4.0",
     "style-loader": "^0.18.2",
-    "webpack": "^2.3.3",
+    "webpack": "^4.8.3",
+    "webpack-cli": "^3.3.4",
     "webpack-dev-middleware": "^1.12.2",
     "webpack-dev-server": "^3.1.14",
     "webpack-hot-middleware": "^2.24.3"
