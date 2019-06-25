@@ -5,7 +5,6 @@ all: test
 clean:
 	make -C cmd/gofrd clean
 	make -C lib/gofr clean
-	rm -fr vendor
 	
 clobber: clean
 	make -C cmd/gofrd clobber
